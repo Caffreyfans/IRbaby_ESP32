@@ -1,0 +1,21 @@
+{
+    "project_name":       "bootloader",
+    "project_path":       "/home/caffreyfans/git/esp-idf/components/bootloader/subproject",
+    "build_dir":          "/home/caffreyfans/git/IRbaby_dev/IRbaby_ESP32/build/bootloader",
+    "config_file":        "/home/caffreyfans/git/IRbaby_dev/IRbaby_ESP32/sdkconfig",
+    "config_defaults":    "",
+    "app_elf":            "bootloader.elf",
+    "app_bin":            "bootloader.bin",
+    "git_revision":       "v4.4-dev-1404-gc13afea63-dirty",
+    "target":             "esp32s2",
+    "rev":                "",
+    "phy_data_partition": "",
+    "monitor_baud" :      "115200",
+    "monitor_toolprefix": "xtensa-esp32s2-elf-",
+    "config_environment" : {
+        "COMPONENT_KCONFIGS" : "/home/caffreyfans/git/esp-idf/components/efuse/Kconfig;/home/caffreyfans/git/esp-idf/components/esp32s2/Kconfig;/home/caffreyfans/git/esp-idf/components/esp_common/Kconfig;/home/caffreyfans/git/esp-idf/components/esp_hw_support/Kconfig;/home/caffreyfans/git/esp-idf/components/esp_system/Kconfig;/home/caffreyfans/git/esp-idf/components/freertos/Kconfig;/home/caffreyfans/git/esp-idf/components/log/Kconfig;/home/caffreyfans/git/esp-idf/components/newlib/Kconfig;/home/caffreyfans/git/esp-idf/components/spi_flash/Kconfig",
+        "COMPONENT_KCONFIGS_PROJBUILD" : "/home/caffreyfans/git/esp-idf/components/bootloader/Kconfig.projbuild;/home/caffreyfans/git/esp-idf/components/esp_rom/Kconfig.projbuild;/home/caffreyfans/git/esp-idf/components/esptool_py/Kconfig.projbuild;/home/caffreyfans/git/esp-idf/components/partition_table/Kconfig.projbuild"
+    },
+    "build_components" : [ "bootloader", "bootloader_support", "efuse", "esp32s2", "esp_common", "esp_hw_support", "esp_rom", "esp_system", "esptool_py", "freertos", "hal", "log", "main", "micro-ecc", "newlib", "partition_table", "soc", "spi_flash", "xtensa", "" ],
+    "build_component_paths" : [ "/home/caffreyfans/git/esp-idf/components/bootloader", "/home/caffreyfans/git/esp-idf/components/bootloader_support", "/home/caffreyfans/git/esp-idf/components/efuse", "/home/caffreyfans/git/esp-idf/components/esp32s2", "/home/caffreyfans/git/esp-idf/components/esp_common", "/home/caffreyfans/git/esp-idf/components/esp_hw_support", "/home/caffreyfans/git/esp-idf/components/esp_rom", "/home/caffreyfans/git/esp-idf/components/esp_system", "/home/caffreyfans/git/esp-idf/components/esptool_py", "/home/caffreyfans/git/esp-idf/components/freertos", "/home/caffreyfans/git/esp-idf/components/hal", "/home/caffreyfans/git/esp-idf/components/log", "/home/caffreyfans/git/esp-idf/components/bootloader/subproject/main", "/home/caffreyfans/git/esp-idf/components/bootloader/subproject/components/micro-ecc", "/home/caffreyfans/git/esp-idf/components/newlib", "/home/caffreyfans/git/esp-idf/components/partition_table", "/home/caffreyfans/git/esp-idf/components/soc", "/home/caffreyfans/git/esp-idf/components/spi_flash", "/home/caffreyfans/git/esp-idf/components/xtensa", "" ]
+}
