@@ -1,7 +1,7 @@
 /*
  * @Author: Caffreyfans
  * @Date: 2021-06-18 00:33:23
- * @LastEditTime: 2021-06-18 00:35:41
+ * @LastEditTime: 2021-06-18 23:36:19
  * @Description: 
  */
 /* HTTP GET Example using plain POSIX sockets
@@ -28,6 +28,9 @@
 #include "lwip/netdb.h"
 #include "lwip/dns.h"
 #include "irbaby.h"
+#include "esp_spiffs.h"
+
+static const char *TAG = "IRbaby";
 static void http_get_task(void *params)
 {
     (void)params;
@@ -46,12 +49,18 @@ void app_main(void)
     ESP_ERROR_CHECK(nvs_flash_init());
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());
-
-    /* This helper function configures Wi-Fi or Ethernet, as selected in menuconfig.
-     * Read "Establishing Wi-Fi or Ethernet Connection" section in
-     * examples/protocols/README.md for more information about this function.
-     */
     ESP_ERROR_CHECK(example_connect());
+    ESP_LOGI(TAG, "Initializing SPIFFS");
+
+    esp_vfs_spiffs_conf_t conf = {
+        .base_path = "",
+        .partition_label = NULL,
+        .max_files = 5,
+        .format_if_mount_failed = true};
+
+    // Use settings defined above to initialize and mount SPIFFS filesystem.
+    // Note: esp_vfs_spiffs_register is an all-in-one convenience function.
+    esp_err_t ret = esp_vfs_spiffs_register(&conf);
 
     xTaskCreate(&http_get_task, "http_get_task", 4096, NULL, 5, NULL);
 }
