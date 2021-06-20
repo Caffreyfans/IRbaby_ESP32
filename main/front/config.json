@@ -1,0 +1,515 @@
+{
+    "label": "IRbaby",
+    "render": "tabs",
+    "tabs": [
+        {
+            "label": "IR",
+            "render": "contents",
+            "contents": [
+                {
+                    "render": "cells",
+                    "label": "空调基础控制 AC Main Control",
+                    "cells": [
+                        {
+                            "render": "switch",
+                            "label": "开关 Power",
+                            "key": "power",
+                            "path": ""
+                        },
+                        {
+                            "render": "select",
+                            "label": "模式 Mode",
+                            "key": "mode",
+                            "path": "",
+                            "options": [
+                                {
+                                    "label": "Cool",
+                                    "value": "1"
+                                },
+                                {
+                                    "label": "Heat",
+                                    "value": "2"
+                                }
+                            ]
+                        },
+                        {
+                            "render": "select",
+                            "label": "温度 Temperature",
+                            "key": "temperature",
+                            "path": "",
+                            "options": [
+                                {
+                                    "label": "16",
+                                    "value": "16"
+                                },
+                                {
+                                    "label": "17",
+                                    "value": "17"
+                                },
+                                {
+                                    "label": "18",
+                                    "value": "18"
+                                },
+                                {
+                                    "label": "19",
+                                    "value": "19"
+                                },
+                                {
+                                    "label": "20",
+                                    "value": "20"
+                                },
+                                {
+                                    "label": "21",
+                                    "value": "21"
+                                },
+                                {
+                                    "label": "22",
+                                    "value": "22"
+                                },
+                                {
+                                    "label": "23",
+                                    "value": "23"
+                                },
+                                {
+                                    "label": "24",
+                                    "value": "24"
+                                },
+                                {
+                                    "label": "25",
+                                    "value": "25"
+                                },
+                                {
+                                    "label": "26",
+                                    "value": "26"
+                                },
+                                {
+                                    "label": "27",
+                                    "value": "27"
+                                },
+                                {
+                                    "label": "28",
+                                    "value": "28"
+                                },
+                                {
+                                    "label": "29",
+                                    "value": "29"
+                                },
+                                {
+                                    "label": "30",
+                                    "value": "30"
+                                }
+                            ]
+                        },
+                        {
+                            "render": "select",
+                            "label": "风速 Fan Speed",
+                            "key": "fanspeed",
+                            "path": "",
+                            "options": [
+                                {
+                                    "label": "Auto(0)",
+                                    "value": "0"
+                                },
+                                {
+                                    "label": "Min(1)",
+                                    "value": "1"
+                                },
+                                {
+                                    "label": "Low(2)",
+                                    "value": "2"
+                                },
+                                {
+                                    "label": "Med(3)",
+                                    "value": "3"
+                                },
+                                {
+                                    "label": "High(4)",
+                                    "value": "4"
+                                },
+                                {
+                                    "label": "Max(5)",
+                                    "value": "5"
+                                }
+                            ]
+                        },
+                        {
+                            "render": "switch",
+                            "label": "上下扫风 Swing(V)",
+                            "key": "swingv",
+                            "path": ""
+                        },
+                        {
+                            "render": "switch",
+                            "label": "左右扫风 Swing(H)",
+                            "key": "swingh",
+                            "path": ""
+                        },
+                        {
+                            "render": "switch",
+                            "label": "灯光 Light",
+                            "key": "light",
+                            "path": ""
+                        },
+                        {
+                            "render": "url",
+                            "label": "保存为上电状态 Save as Power-on State",
+                            "key": "save_ac_state"
+                        },
+                        {
+                            "render": "url",
+                            "label": "发射红外 Send IR",
+                            "key": "send_ir"
+                        }
+                    ]
+                },
+                {
+                    "render": "cells",
+                    "label": "空调更多控制 AC Sub Control",
+                    "cells": [
+                        {
+                            "render": "switch",
+                            "label": "静音 Quiet",
+                            "key": "quiet"
+                        },
+                        {
+                            "render": "switch",
+                            "label": "强劲 Turbo",
+                            "key": "turbo"
+                        },
+                        {
+                            "render": "switch",
+                            "label": "经济 Econo",
+                            "key": "econo"
+                        },
+                        {
+                            "render": "switch",
+                            "label": "过滤 Filter",
+                            "key": "filter"
+                        },
+                        {
+                            "render": "switch",
+                            "label": "清洁 Clean",
+                            "key": "clean"
+                        },
+                        {
+                            "render": "switch",
+                            "label": "蜂鸣 Beep",
+                            "key": "beep"
+                        }
+                    ]
+                },
+                {
+                    "render": "tip",
+                    "label": "重复点击底部tab标签可同步。Re-click bottom tab to sync."
+                }
+            ]
+        },
+        {
+            "label": "GPIO",
+            "render": "contents",
+            "contents": [
+                {
+                    "render": "cells",
+                    "label": "IR Pins",
+                    "cells": [
+                        {
+                            "render": "select",
+                            "label": "IR send",
+                            "key": "pin_ir_send",
+                            "options": [
+                                {
+                                    "label": "D1 (GPIO5)",
+                                    "value": "5"
+                                },
+                                {
+                                    "label": "D2 (GPIO4)",
+                                    "value": "4"
+                                },
+                                {
+                                    "label": "D5 (GPIO14)",
+                                    "value": "14"
+                                },
+                                {
+                                    "label": "D6 (GPIO12)",
+                                    "value": "12"
+                                },
+                                {
+                                    "label": "D7 (GPIO13)",
+                                    "value": "13"
+                                }
+                            ]
+                        },
+                        {
+                            "render": "select",
+                            "label": "IR receive",
+                            "key": "pin_ir_recv",
+                            "options": [
+                                {
+                                    "label": "D1 (GPIO5)",
+                                    "value": "5"
+                                },
+                                {
+                                    "label": "D2 (GPIO4)",
+                                    "value": "4"
+                                },
+                                {
+                                    "label": "D5 (GPIO14)",
+                                    "value": "14"
+                                },
+                                {
+                                    "label": "D6 (GPIO12)",
+                                    "value": "12"
+                                },
+                                {
+                                    "label": "D7 (GPIO13)",
+                                    "value": "13"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "render": "cells",
+                    "label": "LED Pins",
+                    "cells": [
+                        {
+                            "render": "select",
+                            "label": "LED WiFi",
+                            "key": "pin_led_wifi",
+                            "options": [
+                                {
+                                    "label": "D0 (GPIO16)",
+                                    "value": "16"
+                                },
+                                {
+                                    "label": "D4 (GPIO2)",
+                                    "value": "2"
+                                }
+                            ]
+                        },
+                        {
+                            "render": "select",
+                            "label": "LED IR",
+                            "key": "pin_led_ir",
+                            "options": [
+                                {
+                                    "label": "D1 (GPIO5)",
+                                    "value": "5"
+                                },
+                                {
+                                    "label": "D2 (GPIO4)",
+                                    "value": "4"
+                                },
+                                {
+                                    "label": "D5 (GPIO14)",
+                                    "value": "14"
+                                },
+                                {
+                                    "label": "D6 (GPIO12)",
+                                    "value": "12"
+                                },
+                                {
+                                    "label": "D7 (GPIO13)",
+                                    "value": "13"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "render": "cells",
+                    "label": "KEY Pin",
+                    "cells": [
+                        {
+                            "render": "select",
+                            "label": "KEY",
+                            "key": "pin_key",
+                            "options": [
+                                {
+                                    "label": "D3 (GPIO0)",
+                                    "value": "0"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "label": "Info",
+            "render": "contents",
+            "contents": [
+                {
+                    "render": "cells",
+                    "label": "Status",
+                    "cells": [
+                        {
+                            "render": "text",
+                            "label": "Boot",
+                            "key": "boot"
+                        },
+                        {
+                            "render": "text",
+                            "label": "Free Heap",
+                            "key": "free_heap"
+                        },
+                        {
+                            "render": "text",
+                            "label": "Reset Reason",
+                            "key": "reset_reason"
+                        }
+                    ]
+                },
+                {
+                    "render": "cells",
+                    "label": "WiFi",
+                    "cells": [
+                        {
+                            "render": "text",
+                            "label": "SSID",
+                            "key": "wifi_ssid"
+                        },
+                        {
+                            "render": "text",
+                            "label": "IP",
+                            "key": "wifi_ip"
+                        },
+                        {
+                            "render": "text",
+                            "label": "MAC",
+                            "key": "wifi_mac"
+                        },
+                        {
+                            "render": "text",
+                            "label": "RSSI",
+                            "key": "wifi_rssi"
+                        }
+                    ]
+                },
+                {
+                    "render": "cells",
+                    "label": "Software",
+                    "cells": [
+                        {
+                            "render": "text",
+                            "label": "Build Time",
+                            "key": "build_time"
+                        },
+                        {
+                            "render": "text",
+                            "label": "Sketch Size",
+                            "key": "sketch_size"
+                        },
+                        {
+                            "render": "text",
+                            "label": "Free Sketch Space",
+                            "key": "free_sketch_space"
+                        },
+                        {
+                            "render": "text",
+                            "label": "Core Version",
+                            "key": "core_version"
+                        },
+                        {
+                            "render": "text",
+                            "label": "SDK version",
+                            "key": "sdk_version"
+                        }
+                    ]
+                },
+                {
+                    "render": "cells",
+                    "label": "Hardware",
+                    "cells": [
+                        {
+                            "render": "text",
+                            "label": "CPU Freq",
+                            "key": "cpu_freq"
+                        },
+                        {
+                            "render": "text",
+                            "label": "Flash Size",
+                            "key": "flash_size"
+                        },
+                        {
+                            "render": "text",
+                            "label": "Flash Speed",
+                            "key": "flash_speed"
+                        },
+                        {
+                            "render": "text",
+                            "label": "FS Total",
+                            "key": "fs_total"
+                        },
+                        {
+                            "render": "text",
+                            "label": "FS Used",
+                            "key": "fs_used"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "label": "More",
+            "render": "contents",
+            "contents": [
+                {
+                    "render": "cells",
+                    "label": "More settings",
+                    "cells": [
+                        {
+                            "render": "url",
+                            "label": "WiFi Config",
+                            "key": "/wificonfig"
+                        },
+                        {
+                            "render": "url",
+                            "label": "File Manager",
+                            "key": "/file"
+                        },
+                        {
+                            "render": "url",
+                            "label": "Web Update",
+                            "key": "/update"
+                        }
+                    ]
+                },
+                {
+                    "render": "cells",
+                    "label": "System",
+                    "cells": [
+                        {
+                            "render": "url",
+                            "label": "Reboot",
+                            "confirm": "Are you sure to reboot?",
+                            "key": "reboot"
+                        }
+                    ]
+                },
+                {
+                    "render": "cells",
+                    "label": "Sensor",
+                    "cells": [
+                        {
+                            "render": "url",
+                            "label": "Sensor Page",
+                            "key": "#sensor"
+                        }
+                    ]
+                },
+                {
+                    "render": "cells",
+                    "label": "Author",
+                    "cells": [
+                        {
+                            "render": "url",
+                            "label": "https://github.com/Caffreyfans/",
+                            "key": "https://github.com/Caffreyfans/"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "stdio.h": "c",
-        "esp_wifi.h": "c"
+        "esp_wifi.h": "c",
+        "*.inc": "c"
     }
 }

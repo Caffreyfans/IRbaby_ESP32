@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+        charset="utf-8">
+    <meta name="format-detection" content="telephone=no">
+    <link rel="icon" href="data:image/ico;base64,aWNv">
+    <style type="text/css">
+        :root {
+            --color-primary: #07c160;
+            --height-cell: 44px;
+            --padding-horizontal: 16px;
+            --color-active: #ececec;
+            /* 点击时颜色 */
+            --color-divider: #eeeeee;
+            --size-loading: 34px;
+            --color-link: #576b95;
+            --color-arrow: #a6a6a6;
+            --size-tabbar-icon: 28px;
+            --color-tab-item: #cccccc;
+            --color-tab-item-on: #07c160;
+        }
+
+        * {
+            padding: 0;
+            margin: 0;
+            text-decoration: none;
+            -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+            -webkit-appearance: none;
+        }
+
+        html {
+            -ms-text-size-adjust: 100%;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        body {
+            font-family: -apple-system-font, microsoft yahei, Helvetica Neue, sans-serif;
+            background-color: #ededed;
+        }
+
+        .ui_titlebar {
+            display: flex;
+            position: fixed;
+            z-index: 500;
+            top: 0;
+            width: 100%;
+            height: 44px;
+            line-height: 44px;
+            text-align: center;
+            background-color: #FFF;
+        }
+
+        .ui_titlebar:after {
+            content: " ";
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            height: 1px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            color: rgba(0, 0, 0, 0.1);
+            -webkit-transform-origin: 0 100%;
+            transform-origin: 0 100%;
+            -webkit-transform: scaleY(0.5);
+            transform: scaleY(0.5);
+        }
+
+        .ui_titlebar_text {
+            text-align: center;
+            color: #000000;
+            font-size: 17px;
+            width: 100%;
+            height: 100%;
+            font-weight: 500;
+        }
+
+        .ui_cells {
+            margin-top: 22px;
+            background-color: #fff;
+            line-height: 22px;
+            font-size: 17px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .ui_cells:before {
+            content: " ";
+            position: absolute;
+            left: 0;
+            top: 0;
+            right: 0;
+            height: 1px;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            color: rgba(0, 0, 0, 0.1);
+            -webkit-transform-origin: 0 0;
+            transform-origin: 0 0;
+            -webkit-transform: scaleY(0.5);
+            transform: scaleY(0.5);
+        }
+
+        .ui_cells:after {
+            content: " ";
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            height: 1px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            color: rgba(0, 0, 0, 0.1);
+            -webkit-transform-origin: 0 100%;
+            transform-origin: 0 100%;
+            -webkit-transform: scaleY(0.5);
+            transform: scaleY(0.5);
+        }
+
+        .ui_cells__title {
+            margin-top: 16px;
+            margin-bottom: 4px;
+            padding-left: 16px;
+            padding-right: 16px;
+            color: rgba(0, 0, 0, 0.5);
+            font-size: 14px;
+        }
+
+        .ui_cells__title+.ui_cells {
+            margin-top: 0px;
+        }
+
+        .ui_cell {
+            padding: 11px 16px;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .ui_cell:before {
+            content: " ";
+            position: absolute;
+            left: 0;
+            top: 0;
+            right: 0;
+            height: 1px;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            color: rgba(0, 0, 0, 0.1);
+            -webkit-transform-origin: 0 0;
+            transform-origin: 0 0;
+            -webkit-transform: scaleY(0.5);
+            transform: scaleY(0.5);
+            left: 16px;
+        }
+
+        .ui_cell:first-child:before {
+            display: none;
+        }
+
+        .ui_cell__bd {
+            flex: 1;
+        }
+
+        .ui_cell__ft {
+            text-align: right;
+            color: rgba(0, 0, 0, 0.5);
+        }
+
+        .ui_cell_access {
+            color: inherit;
+        }
+
+        .ui_cell_access:active {
+            background-color: #ececec;
+        }
+
+        .ui_cell_link {
+            color: #576b95;
+        }
+
+        .ui_cell_access .ui_cell__ft {
+            padding-right: 22px;
+            position: relative;
+        }
+
+        .ui_cell_access .ui_cell__ft:after {
+            content: " ";
+            width: 12px;
+            height: 24px;
+            mask-position: 0 0;
+            mask-repeat: no-repeat;
+            mask-size: 100%;
+            background-color: currentColor;
+            color: rgba(0, 0, 0, 0.3);
+            -webkit-mask-image: url(data:image/svg+xml,%3Csvg%20width%3D%2212%22%20height%3D%2224%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M2.454%206.58l1.06-1.06%205.78%205.779a.996.996%200%20010%201.413l-5.78%205.779-1.06-1.061%205.425-5.425-5.425-5.424z%22%20fill%3D%22%23B2B2B2%22%20fill-rule%3D%22evenodd%22%2F%3E%3C%2Fsvg%3E);
+            position: absolute;
+            top: 50%;
+            right: 0;
+            margin-top: -12px;
+        }
+
+        .ui_input {
+            width: 100%;
+            border: 0;
+            outline: 0;
+            -webkit-appearance: none;
+            background-color: transparent;
+            font-size: inherit;
+            color: inherit;
+        }
+
+        .ui_input::-webkit-outer-spin-button,
+        .ui_input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .ui_cell__hd {
+            position: relative;
+        }
+
+        .ui_cell__hd+.ui_cell__bd {
+            padding-left: 16px;
+        }
+
+        .ui_btn-area {
+            margin: 16px 16px 8px;
+        }
+
+        .ui_btn {
+            position: relative;
+            display: block;
+            padding: 11px 24px;
+            box-sizing: border-box;
+            font-size: 17px;
+            text-align: center;
+            text-decoration: none;
+            color: #fff;
+            line-height: 22px;
+            border-radius: 4px;
+            overflow: hidden;
+            background-color: #07c160;
+            width: 100%;
+            flex: 1;
+            border-width: 0;
+            outline: 0;
+            -webkit-appearance: none;
+        }
+
+        .ui_btn:active {
+            background-color: #06ae56;
+        }
+
+        .ui_footer {
+            color: rgba(0, 0, 0, 0.3);
+            font-size: 14px;
+            text-align: center;
+            background-color: #ededed;
+        }
+
+        .ui_footer a {
+            color: #576b95;
+        }
+
+        .ui_footer_fixed-bottom {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding-top: 12px;
+            padding-bottom: 16px;
+            padding-bottom: calc(16px + constant(safe-area-inset-bottom));
+            padding-bottom: calc(16px + env(safe-area-inset-bottom));
+            left: constant(safe-area-inset-left);
+            left: env(safe-area-inset-left);
+            right: constant(safe-area-inset-right);
+            right: env(safe-area-inset-right);
+        }
+
+        .ui_footer__link {
+            display: inline-block;
+            margin: 2px 8px;
+            position: relative;
+            font-size: 14px;
+        }
+
+        .ui_footer__text {
+            padding: 2px 16px;
+            font-size: 12px;
+        }
+
+        .ui_content {
+            padding-top: 44px;
+            padding-bottom: calc(88px + env(safe-area-inset-bottom));
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+        }
+
+        .ui_toptips {
+            display: block;
+            opacity: 0;
+            position: fixed;
+            top: 8px;
+            left: 8px;
+            right: 8px;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 14px;
+            text-align: center;
+            color: #fff;
+            z-index: 15000;
+            word-wrap: break-word;
+            word-break: break-all;
+            pointer-events: none;
+            transition: opacity 0.15s linear;
+        }
+
+        .ui_toptips_warn {
+            background-color: #fa5151;
+        }
+
+        .ui_toast {
+            position: fixed;
+            opacity: 0;
+            top: 40%;
+            left: 50%;
+            -webkit-transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%);
+            width: 120px;
+            height: 120px;
+            border-radius: 8px;
+            font-size: 17px;
+            text-align: center;
+            color: #fff;
+            z-index: 5000;
+            word-wrap: break-word;
+            word-break: break-all;
+            pointer-events: none;
+            background-color: rgba(76, 76, 76, 0.9);
+            transition: opacity 0.15s linear;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            /*子内容垂直居中*/
+            align-items: center;
+            /*子内容水平居中*/
+        }
+
+        .ui_toast__content {
+            font-size: 14px;
+            margin-top: 14px;
+        }
+
+        @keyframes loading-rotate {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .ui_loading {
+            display: block;
+            border: 4px solid #999999;
+            border-left-color: var(--color-primary);
+            border-radius: 50%;
+            width: var(--size-loading);
+            height: var(--size-loading);
+            animation: loading-rotate 0.5s linear infinite;
+            transform-origin: 50% 50%;
+        }
+
+        .ui_message {
+            position: fixed;
+            opacity: 0;
+            top: 40%;
+            left: 50%;
+            -webkit-transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            width: 210px;
+            border-radius: 8px;
+            font-size: 17px;
+            text-align: center;
+            color: #fff;
+            z-index: 5000;
+            word-wrap: break-word;
+            word-break: break-all;
+            pointer-events: none;
+            background-color: rgba(76, 76, 76, 0.9);
+            -webkit-transition: all 0.1s linear;
+            transition: all 0.1s linear;
+        }
+
+        .ui_opacity_1 {
+            opacity: 1;
+        }
+    </style>
+    <title>
+        ESP8266/ESP32配网
+    </title>
+    <style>
+    </style>
+</head>
+
+<body ontouchstart="">
+    <div class="ui_toptips ui_toptips_warn" id="id_toptips">
+    </div>
+    <div class="ui_toast" id="id_toast">
+        <div class="ui_loading"></div>
+    </div>
+    <div class="ui_message" id="id_message">
+    </div>
+    <div class="ui_titlebar">
+        <p class="ui_titlebar_text">
+            ESP8266/ESP32配网
+        </p>
+    </div>
+    <div class="ui_content">
+        <div class="ui_cells__title">
+            扫描到的WiFi
+        </div>
+        <div class="ui_cells" id="id_wifi_list">
+            <a href="javascript:scan();" class="ui_cell ui_cell_access ui_cell_link">
+                <div class="ui_cell__bd">
+                    点击扫描WiFi
+                </div>
+            </a>
+        </div>
+        <div class="ui_cells__title">
+            配置WiFi
+        </div>
+        <div class="ui_cells" id="id_wifi_to_connect">
+            <div class="ui_cell">
+                <div class="ui_cell__hd">
+                    WiFi名称
+                </div>
+                <div class="ui_cell__bd">
+                    <input class="ui_input" type="text" name="ssid" id="id_wifi_ssid" placeholder="输入WiFi名称"
+                        maxlength=32 value="">
+                </div>
+            </div>
+            <div class="ui_cell">
+                <div class="ui_cell__hd">
+                    WiFi密码
+                </div>
+                <div class="ui_cell__bd">
+                    <input class="ui_input" type="text" name="pass" id="id_wifi_pass" placeholder="输入WiFi密码"
+                        maxlength=32>
+                </div>
+            </div>
+        </div>
+        <div class="ui_btn-area">
+            <button class="ui_btn" onclick='connect()'>
+                发送WiFi配置信息
+            </button>
+        </div>
+    </div>
+    <div class="ui_footer ui_footer_fixed-bottom">
+        <p class="ui_footer__text">Author: https://github.com/Mixiaoxiao/</p>
+    </div>
+    <script type="text/javascript">
+        var ele_toast = document.getElementById("id_toast");
+        var ele_toptips = document.getElementById("id_toptips");
+        var ele_message = document.getElementById("id_message");
+        var ele_toptips_timer = null;
+        var ele_message_timer = null;
+        function toastShow(show) {
+            if (show) {
+                ele_toast.classList.add('ui_opacity_1');
+            } else {
+                ele_toast.classList.remove('ui_opacity_1');
+            }
+        }
+        function toptipsShow(show, text) {
+            if (show) {
+                toptipsShow(false);
+                ele_toptips.innerHTML = text;
+                ele_toptips.classList.add('ui_opacity_1');
+                ele_toptips_timer = setTimeout(() => {
+                    toptipsShow(false);
+                }, 2000);
+            } else {
+                if (ele_toptips_timer) {
+                    clearTimeout(ele_toptips_timer);
+                    ele_toptips_timer = null;
+                }
+                ele_toptips.classList.remove('ui_opacity_1');
+            }
+        }
+        function messageShow(show, text) {
+            if (show) {
+                messageShow(false);
+                ele_message.innerHTML = text;
+                ele_message.classList.add('ui_opacity_1');
+                ele_message_timeout_func = setTimeout(() => {
+                    messageShow(false);
+                }, 2000);
+            } else {
+                if (ele_message_timer) {
+                    clearTimeout(ele_message_timer);
+                    ele_message_timer = null;
+                }
+                ele_message.classList.remove('ui_opacity_1');
+            }
+        }
+        const href = window.location.href;
+        const local_mode = (href.startsWith("http://127.0.0.1")
+            || href.indexOf(":5500") > 0 || !href.startsWith("http"));
+        const timeout_default = 15 * 1000;//15s
+        function post(path, form, handler, timeout) {
+            var xhr = new XMLHttpRequest();
+            if (timeout) {
+                xhr.timeout = timeout;
+            } else {
+                xhr.timeout = timeout_default;
+            }
+            log("Post timeout: " + xhr.timeout);
+            xhr.responseType = "text";
+            if (!path.startsWith('/')) {
+                path = '/' + path;
+            }
+            if (local_mode) {
+                xhr.open('POST', 'http://192.168.1.100:80' + path, true);
+            } else {
+                xhr.open('POST', path, true);
+            }
+            xhr.onload = function (e) {
+                if (this.status == 200) {
+                    const res = this.responseText;
+                    if (res.length < 1000000) {
+                        log("POST: " + path + " res->\n" + res);
+                    } else {
+                        log("POST: " + path + " res->\n" + res.substr(0, 100) + "...");
+                    }
+                    toastShow(false);
+                    if (handler) {
+                        handler(res);
+                    }
+                } else {
+                    toptipsShow(true, "[" + this.status + "]");
+                }
+            };
+            xhr.ontimeout = function (e) {
+                toptipsShow(true, "Network timeout");
+                log("error-> timeout");
+            };
+            xhr.onerror = function (e) {
+                toptipsShow(true, "Network error");
+                log("error->" + e);
+            };
+            xhr.onloadend = function (e) {
+                toastShow(false);
+            }
+            toptipsShow(false);
+            toastShow(true);
+            xhr.send(form ? form : new FormData()); //发送数据
+        }
+    </script>
+    <script>
+        String.prototype.replaceAll = function (rgExp, replaceText) {
+            return this.replace(new RegExp(rgExp, "gm"), replaceText);
+        }
+        var div_ssid = document.getElementById("id_wifi_ssid");
+        var div_pass = document.getElementById("id_wifi_pass");
+        var div_list = document.getElementById("id_wifi_list");
+        const url = "/wificonfig";
+        function inputSSID(ssid) {
+            log('inputSSID->' + ssid);
+            div_ssid.value = ssid;
+            div_pass.focus();
+            div_pass.select();
+        }
+        function scan() {
+            var params = new FormData();
+            params.append("scan", "1");
+            post(url, params,
+                function (res) {
+                    var item_div = "<a class=\"ui_cell ui_cell_access\" href=\"javascript:inputSSID('=SSID=');\"><div class=\"ui_cell__bd\"><p>=SSID=</p></div><div class=\"ui_cell__ft\">=RSSI=</div></a>";
+                    var scan_div = "<a  href=\"javascript:scan();\" class=\"ui_cell ui_cell_access ui_cell_link \"><div class=\"ui_cell__bd\">重新扫描</div></a>";
+                    var networks = JSON.parse(res);
+                    if (networks.length <= 0) {
+                        toptipsShow(true, "暂无结果，请稍后重新扫描");
+                        div_list.innerHTML = "";
+                        return;
+                    }
+                    networks.sort(function (left, right) {
+                        return right.rssi - left.rssi; //按信号强度排序
+                    });
+                    var list_content = "";
+                    for (i = 0; i < networks.length; i++) {
+                        var percent;
+                        if (parseInt(networks[i].rssi) <= -100) {
+                            percent = 0;
+                        } else if (parseInt(networks[i].rssi) >= -50) {
+                            percent = 100;
+                        } else {
+                            percent = 2 * (parseInt(networks[i].rssi) + 100);
+                        }
+                        var item_div_i = item_div.replaceAll("=SSID=", networks[i].ssid).replaceAll("=RSSI=", percent + "%");
+                        list_content += item_div_i;
+                    }
+                    list_content += scan_div;
+                    div_list.innerHTML = list_content;
+                });
+        }
+        function connect() {
+            var ssid = div_ssid.value;
+            var pass = div_pass.value;
+            if (ssid.length == 0 || pass.length == 0) {
+                toptipsShow(true, "请输入WiFi名称和密码");
+                return;
+            }
+            var params = new FormData();
+            params.append("ssid", ssid);
+            params.append("pass", pass);
+            post(url, params, function (res) {
+                var j = JSON.parse(res);
+                if (j.code && parseInt(j.code) == 0) {
+                    messageShow(true, "WiFi配置已发送");
+                } else {
+                    toptipsShow(true, j.msg);
+                }
+            });
+        }
+        function log(msg) {
+            console.log(msg);
+        }
+        window.onload = function () {
+            scan();
+        }
+    </script>
+</body>
+
+</html>
