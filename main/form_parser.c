@@ -10,7 +10,7 @@
 #include "stdbool.h"
 #include "string.h"
 #include "stdio.h"
-cJSON *form_parse(const char *data) {
+cJSON *form_parse(char *data) {
   char *key = "name=\"";
   int key_len = strlen(key);
   char *index = NULL;
