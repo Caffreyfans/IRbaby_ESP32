@@ -1,7 +1,7 @@
 /*
  * @Author: Caffreyfans
  * @Date: 2021-06-18 00:33:23
- * @LastEditTime: 2021-06-20 22:42:48
+ * @LastEditTime: 2021-06-22 00:02:51
  * @Description:
  */
 /* HTTP GET Example using plain POSIX sockets
@@ -32,6 +32,7 @@
 #include "protocol_examples_common.h"
 #include "web.h"
 #include "wifimanager.h"
+#include "handler.h"
 static const char *TAG = "IRbaby";
 static void http_get_task(void *params) {
   (void)params;
@@ -61,5 +62,6 @@ void app_main(void) {
   esp_vfs_spiffs_register(&conf);
   wifi_start_station("NEAL", "11111111");
   start_webserver();
+  get_system_info_handle();
   // xTaskCreate(&http_get_task, "http_get_task", 4096, NULL, 5, NULL);
 }

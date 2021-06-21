@@ -1,19 +1,19 @@
 /*
  * @Author: Caffreyfans
  * @Date: 2021-06-19 15:57:08
- * @LastEditTime: 2021-06-20 23:11:06
+ * @LastEditTime: 2021-06-22 00:05:40
  * @Description:
  */
 #include "web.h"
 
-#include <esp_err.h>
-#include <esp_event.h>
-#include <esp_log.h>
-#include <nvs_flash.h>
-#include <string.h>
-
+#include "esp_err.h"
+#include "esp_event.h"
+#include "esp_log.h"
+#include "esp_wifi.h"
 #include "form_parser.h"
 #include "handler.h"
+#include "nvs_flash.h"
+#include "string.h"
 #include "sys/param.h"
 
 static const char *TAG = "WEB";
@@ -25,10 +25,18 @@ static esp_err_t index_handler(httpd_req_t *req) {
   httpd_resp_sendstr(req, (const char *)req->user_ctx);
   return ESP_OK;
 }
+
 static esp_err_t root_handler(httpd_req_t *req) {
-  httpd_resp_sendstr(req, (const char *)req->user_ctx);
+  wifi_mode_t wifi_mode;
+  esp_wifi_get_mode(&wifi_mode);
+  if (wifi_mode == WIFI_MODE_STA) {
+    httpd_resp_sendstr(req, (const char *)root_html);
+  } else {
+    httpd_resp_sendstr(req, (const char *)wificonfig_html);
+  }
   return ESP_OK;
 }
+
 static esp_err_t wificonfig_handler(httpd_req_t *req) {
   if (req->method == HTTP_GET) {
     httpd_resp_sendstr(req, (const char *)req->user_ctx);
@@ -59,6 +67,7 @@ static esp_err_t wificonfig_handler(httpd_req_t *req) {
   if (response != NULL) {
     httpd_resp_set_type(req, "application/json");
     httpd_resp_sendstr(req, response);
+    free(response);
   } else {
     httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "memory run out");
   }
@@ -83,13 +92,12 @@ httpd_handle_t start_webserver(void) {
   const httpd_uri_t root = {.uri = "/",
                             .method = HTTP_GET,
                             .handler = root_handler,
-                            .user_ctx = (void *)root_html};
+                            .user_ctx = NULL};
 
-  const httpd_uri_t index = {.uri = "/index",
-                             .method = HTTP_GET,
-                             .handler = index_handler,
-                             .user_ctx = (void *)config_json};
-
+  const httpd_uri_t index_get = {.uri = "/index",
+                                 .method = HTTP_GET,
+                                 .handler = index_handler,
+                                 .user_ctx = (void *)config_json};
   ESP_LOGI(TAG, "Starting server on port: '%d'", config.server_port);
   if (httpd_start(&server, &config) == ESP_OK) {
     // Set URL handlers
@@ -97,7 +105,7 @@ httpd_handle_t start_webserver(void) {
     httpd_register_uri_handler(server, &wificonfig_post);
     httpd_register_uri_handler(server, &wificonfig_get);
     httpd_register_uri_handler(server, &root);
-    httpd_register_uri_handler(server, &index);
+    httpd_register_uri_handler(server, &index_get);
   }
   return server;
 }
