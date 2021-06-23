@@ -1,7 +1,7 @@
 /*
  * @Author: Caffreyfans
  * @Date: 2021-06-20 10:33:01
- * @LastEditTime: 2021-06-20 12:21:34
+ * @LastEditTime: 2021-06-23 22:44:10
  * @Description:
  */
 #include "form_parser.h"
@@ -46,5 +46,14 @@ cJSON *form_parse(char *data) {
 exit:
   if (has_item) return root;
   cJSON_Delete(root);
+  return NULL;
+}
+
+
+cJSON* get_parse(char* data)
+{
+  int data_len = strlen(data);
+  int start = strchr(data, '?') + 1;
+  if (start == 0) return NULL;
   return NULL;
 }

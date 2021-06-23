@@ -1,27 +1,43 @@
 /*
  * @Author: Caffreyfans
  * @Date: 2021-06-19 17:51:39
- * @LastEditTime: 2021-06-22 00:31:09
+ * @LastEditTime: 2021-06-24 00:39:58
  * @Description:
  */
 #include "handler.h"
 
 #include "esp_log.h"
 #include "esp_netif.h"
+#include "esp_spi_flash.h"
 #include "esp_spiffs.h"
 #include "esp_wifi.h"
 #include "wifimanager.h"
-#include "esp_spi_flash.h"
 #define SCAN_LIST_SIZE 10
 
 static const char *TAG = "handler";
 
-char *connect_wifi(const char *ssid, const char *pass) { return NULL; }
+char *connect_wifi_handle(const char *ssid, const char *pass) {
+  char *response = NULL;
+  cJSON *root = cJSON_CreateObject();
+  if (root == NULL) goto exit;
+  if (wifi_start_station(ssid, pass) == true) {
+    cJSON_AddStringToObject(root, "code", "0");
+    cJSON_AddStringToObject(root, "msg", "SSID and PASSWORD are saved.");
+
+  } else {
+    cJSON_AddStringToObject(root, "code", "-1");
+    cJSON_AddStringToObject(root, "msg", "can not connect to ap");
+  }
+  response = cJSON_Print(response);
+exit:
+  if (root != NULL) cJSON_Delete(root);
+  return response;
+}
 
 char *scan_wifi_handle() {
   char *response = NULL;
   cJSON *root = cJSON_CreateArray();
-  if (root == NULL) return NULL;
+  if (root == NULL) goto exit;
   wifi_ap_record_t ap_infos[SCAN_LIST_SIZE];
   uint8_t ap_count = wifi_scan_ap(ap_infos, SCAN_LIST_SIZE);
   if (ap_count == 0) goto exit;
@@ -72,10 +88,10 @@ char *get_system_info_handle() {
   // ESP_LOGI(TAG, "sdk_version: %s", );
   esp_netif_ip_info_t ip_info;
   esp_netif_get_ip_info(IP_EVENT_STA_GOT_IP, &ip_info);
-  ESP_LOGI(TAG, "wifi_ip: "IPSTR"" , IP2STR(&ip_info.ip));
+  ESP_LOGI(TAG, "wifi_ip: " IPSTR "", IP2STR(&ip_info.ip));
   uint8_t mac[6];
   esp_read_mac(mac, ESP_MAC_WIFI_STA);
-  ESP_LOGI(TAG, "wifi_mac:"MACSTR"", MAC2STR(mac));
+  ESP_LOGI(TAG, "wifi_mac:" MACSTR "", MAC2STR(mac));
   wifi_ap_record_t ap;
   esp_wifi_sta_get_ap_info(&ap);
   ESP_LOGI(TAG, "wifi_rssi: %d", ap.rssi);

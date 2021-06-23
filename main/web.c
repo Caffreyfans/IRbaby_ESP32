@@ -1,7 +1,7 @@
 /*
  * @Author: Caffreyfans
  * @Date: 2021-06-19 15:57:08
- * @LastEditTime: 2021-06-22 00:05:40
+ * @LastEditTime: 2021-06-24 00:44:43
  * @Description:
  */
 #include "web.h"
@@ -63,19 +63,39 @@ static esp_err_t wificonfig_handler(httpd_req_t *req) {
     cur_len += received;
   }
   buf[total_len] = '\0';
-  char *response = scan_wifi_handle();
-  if (response != NULL) {
-    httpd_resp_set_type(req, "application/json");
-    httpd_resp_sendstr(req, response);
-    free(response);
+  cJSON *root = form_parse(buf);
+  if (root == NULL) return ESP_FAIL;
+  cJSON *item = NULL;
+  if ((item = cJSON_GetObjectItem(root, "scan")) != NULL) {
+    char *response = scan_wifi_handle();
+    if (response != NULL) {
+      httpd_resp_set_type(req, "application/json");
+      httpd_resp_sendstr(req, response);
+      free(response);
+    } else {
+      httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR,
+                          "memory run out");
+    }
+  } else if ((item = cJSON_GetObjectItem(root, "ssid")) != NULL) {
+    char *ssid = item->valuestring;
+    char *pass = cJSON_GetObjectItem(root, "pass")->valuestring;
+    char *response = connect_wifi_handle(ssid, pass);
+    if (response != NULL) {
+      shutdown_webserver();
+      start_webserver();
+      free(response);
+    } else {
+      httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR,
+                          "memory run out");
+    }
   } else {
-    httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "memory run out");
+    ESP_LOGI(TAG, "can not get anything");
   }
   return ESP_OK;
 }
 
-httpd_handle_t start_webserver(void) {
-  httpd_handle_t server = NULL;
+static httpd_handle_t server = NULL;
+void start_webserver(void) {
   httpd_config_t config = HTTPD_DEFAULT_CONFIG();
   config.lru_purge_enable = true;
   char *buffer = (char *)calloc(1024, sizeof(char));
@@ -107,5 +127,9 @@ httpd_handle_t start_webserver(void) {
     httpd_register_uri_handler(server, &root);
     httpd_register_uri_handler(server, &index_get);
   }
-  return server;
+}
+
+void shutdown_webserver(void) {
+  if (server != NULL) httpd_stop(server);
+  server = NULL;
 }
