@@ -1,7 +1,7 @@
 /*
  * @Author: Caffreyfans
  * @Date: 2021-06-19 15:57:08
- * @LastEditTime: 2021-06-26 22:54:47
+ * @LastEditTime: 2021-06-26 23:52:35
  * @Description:
  */
 #include "web.h"
@@ -37,16 +37,21 @@ static esp_err_t index_handler(httpd_req_t *req) {
   ret = httpd_query_key_value(query_str, "sync", value, value_buffer_size);
   if (ret == ESP_OK) {
     int tab = atoi(value);
-    switch (tab)
-    {
-    case 0:
-      response = get_ac_status_handle();
-      break;
-    case 2:
-       response = get_system_info_handle();
-       break;
-    default:
-      break;
+    switch (tab) {
+      case 0:
+        response = get_ir_handle();
+        break;
+      case 1:
+        response = get_gpio_handle();
+        break;
+      case 2:
+        response = get_info_handle();
+        break;
+      case 3:
+        response = get_more_handle();
+        break;
+      default:
+        break;
     }
   }
   if (response != NULL) {

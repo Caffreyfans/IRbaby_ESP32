@@ -1,7 +1,7 @@
 /*
  * @Author: Caffreyfans
  * @Date: 2021-06-19 17:51:23
- * @LastEditTime: 2021-06-26 22:47:42
+ * @LastEditTime: 2021-06-26 23:49:29
  * @Description: 
  */
 #ifndef HANDLER_H_
@@ -11,6 +11,8 @@
 
 char *connect_wifi_handle(const char *ssid, const char *pass);
 char *scan_wifi_handle();
-char *get_system_info_handle();
-char *get_ac_status_handle();
+char *get_info_handle();
+char *get_ir_handle();
+char *get_gpio_handle();
+char *get_more_handle();
 #endif // HANDLER_H_

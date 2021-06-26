@@ -1,7 +1,7 @@
 /*
  * @Author: Caffreyfans
  * @Date: 2021-06-19 17:51:39
- * @LastEditTime: 2021-06-26 23:26:52
+ * @LastEditTime: 2021-06-26 23:52:02
  * @Description:
  */
 #include "handler.h"
@@ -11,8 +11,8 @@
 #include "esp_spi_flash.h"
 #include "esp_spiffs.h"
 #include "esp_wifi.h"
-#include "wifimanager.h"
 #include "version.h"
+#include "wifimanager.h"
 #define SCAN_LIST_SIZE 10
 
 char *connect_wifi_handle(const char *ssid, const char *pass) {
@@ -54,7 +54,7 @@ exit:
   return response;
 }
 
-char *get_system_info_handle() {
+char *get_info_handle() {
   char *response = NULL;
   cJSON *root = cJSON_CreateObject();
   if (root == NULL) return NULL;
@@ -116,7 +116,8 @@ char *get_system_info_handle() {
   snprintf(ret_buffer, RET_BUFFER_SIZE, "%dMHz", ets_get_cpu_frequency());
   cJSON_AddStringToObject(root, "cpu_freq", ret_buffer);
 
-  snprintf(ret_buffer, RET_BUFFER_SIZE, "%dMB", spi_flash_get_chip_size() / 1024 / 1024);
+  snprintf(ret_buffer, RET_BUFFER_SIZE, "%dMB",
+           spi_flash_get_chip_size() / 1024 / 1024);
   cJSON_AddStringToObject(root, "flash_size", ret_buffer);
 
   // cJSON_AddStringToObject(root, "flash_speed", );
@@ -133,8 +134,7 @@ char *get_system_info_handle() {
   return response;
 }
 
-char *get_ac_status_handle()
-{
+char *get_ir_handle() {
   char *response = NULL;
   cJSON *root = cJSON_CreateObject();
   if (root == NULL) return NULL;
@@ -151,6 +151,25 @@ char *get_ac_status_handle()
   cJSON_AddStringToObject(root, "econo", "0");
   cJSON_AddStringToObject(root, "filter", "0");
   cJSON_AddStringToObject(root, "beep", "0");
+  response = cJSON_Print(root);
+  cJSON_Delete(root);
+  return response;
+}
+
+char *get_gpio_handle() {
+  char *response = NULL;
+  cJSON *root = cJSON_CreateObject();
+  if (root == NULL) return NULL;
+  response = cJSON_Print(root);
+  cJSON_Delete(root);
+  return response;
+}
+
+char *get_more_handle()
+{
+  char *response = NULL;
+  cJSON *root = cJSON_CreateObject();
+  if (root == NULL) return NULL;
   response = cJSON_Print(root);
   cJSON_Delete(root);
   return response;

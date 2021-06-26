@@ -1,7 +1,7 @@
 /*
  * @Author: Caffreyfans
  * @Date: 2021-06-18 00:33:23
- * @LastEditTime: 2021-06-26 17:02:06
+ * @LastEditTime: 2021-06-26 23:53:41
  * @Description:
  */
 /* HTTP GET Example using plain POSIX sockets
@@ -51,7 +51,6 @@ void app_main(void) {
   ESP_ERROR_CHECK(nvs_flash_init());
   ESP_ERROR_CHECK(esp_netif_init());
   ESP_ERROR_CHECK(esp_event_loop_create_default());
-  wifi_init();
   esp_vfs_spiffs_conf_t conf = {.base_path = "",
                                 .partition_label = NULL,
                                 .max_files = 5,
@@ -60,6 +59,5 @@ void app_main(void) {
   // Use settings defined above to initialize and mount SPIFFS filesystem.
   // Note: esp_vfs_spiffs_register is an all-in-one convenience function.
   esp_vfs_spiffs_register(&conf);
-  get_system_info_handle();
-  // xTaskCreate(&http_get_task, "http_get_task", 4096, NULL, 5, NULL);
+  wifi_init();
 }
