@@ -1,15 +1,15 @@
 /*
  * @Author: Caffreyfans
  * @Date: 2021-06-20 10:33:01
- * @LastEditTime: 2021-06-23 22:44:10
+ * @LastEditTime: 2021-06-26 21:58:17
  * @Description:
  */
 #include "form_parser.h"
 
 #include "esp_log.h"
 #include "stdbool.h"
-#include "string.h"
 #include "stdio.h"
+#include "string.h"
 cJSON *form_parse(char *data) {
   char *key = "name=\"";
   int key_len = strlen(key);
@@ -38,8 +38,6 @@ cJSON *form_parse(char *data) {
     data = end;
     if (index != NULL) {
       cJSON_AddStringToObject(root, name, value);
-      printf("get name = %s\n", name);
-      printf("get value = %s\n", value);
       has_item = true;
     }
   } while (index != NULL);
@@ -49,11 +47,28 @@ exit:
   return NULL;
 }
 
-
-cJSON* get_parse(char* data)
-{
+cJSON *get_parse(char *data) {
+  if (data == NULL) return NULL;
   int data_len = strlen(data);
-  int start = strchr(data, '?') + 1;
-  if (start == 0) return NULL;
-  return NULL;
+  char *start = data;
+  char *end = NULL;
+  cJSON *root = cJSON_CreateObject();
+  if (root == NULL) return NULL;
+  char key[52];
+  char value[52];
+  while ((end = strchr(start, '=')) != NULL) {
+    int len = end - start;
+    memcpy(key, start, len);
+    char *next = strchr(index, '&');
+    if (next != NULL) {
+      end = next - 1;
+    } else {
+      end = data + data_len;
+    }
+    len = end - start;
+    memcpy(value, start, len);
+    cJSON_AddStringToObject(root, key, value);
+    start = end;
+  }
+  return root;
 }

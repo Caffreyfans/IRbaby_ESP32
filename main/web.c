@@ -1,7 +1,7 @@
 /*
  * @Author: Caffreyfans
  * @Date: 2021-06-19 15:57:08
- * @LastEditTime: 2021-06-24 00:44:43
+ * @LastEditTime: 2021-06-26 22:54:47
  * @Description:
  */
 #include "web.h"
@@ -22,7 +22,37 @@ extern const char root_html[] asm("_binary_root_html_start");
 extern const char config_json[] asm("_binary_config_json_start");
 
 static esp_err_t index_handler(httpd_req_t *req) {
-  httpd_resp_sendstr(req, (const char *)req->user_ctx);
+  const int query_buffer_size = 128;
+  const int value_buffer_size = 128;
+  char query_str[value_buffer_size];
+  char value[value_buffer_size];
+  esp_err_t ret = ESP_FAIL;
+  httpd_req_get_url_query_str(req, query_str, query_buffer_size);
+  ret = httpd_query_key_value(query_str, "page", value, value_buffer_size);
+  if (ret == ESP_OK) {
+    httpd_resp_sendstr(req, (const char *)req->user_ctx);
+    return ESP_OK;
+  }
+  char *response = NULL;
+  ret = httpd_query_key_value(query_str, "sync", value, value_buffer_size);
+  if (ret == ESP_OK) {
+    int tab = atoi(value);
+    switch (tab)
+    {
+    case 0:
+      response = get_ac_status_handle();
+      break;
+    case 2:
+       response = get_system_info_handle();
+       break;
+    default:
+      break;
+    }
+  }
+  if (response != NULL) {
+    httpd_resp_sendstr(req, response);
+    free(response);
+  }
   return ESP_OK;
 }
 
@@ -69,7 +99,7 @@ static esp_err_t wificonfig_handler(httpd_req_t *req) {
   if ((item = cJSON_GetObjectItem(root, "scan")) != NULL) {
     char *response = scan_wifi_handle();
     if (response != NULL) {
-      httpd_resp_set_type(req, "application/json");
+      httpd_resp_set_type(req, HTTPD_TYPE_JSON);
       httpd_resp_sendstr(req, response);
       free(response);
     } else {
@@ -81,8 +111,7 @@ static esp_err_t wificonfig_handler(httpd_req_t *req) {
     char *pass = cJSON_GetObjectItem(root, "pass")->valuestring;
     char *response = connect_wifi_handle(ssid, pass);
     if (response != NULL) {
-      shutdown_webserver();
-      start_webserver();
+      httpd_resp_sendstr(req, response);
       free(response);
     } else {
       httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR,
@@ -95,14 +124,20 @@ static esp_err_t wificonfig_handler(httpd_req_t *req) {
 }
 
 static httpd_handle_t server = NULL;
+static char *g_user_ctx = NULL;
 void start_webserver(void) {
+  ESP_LOGI(TAG, "try to start web server");
+  if (server != NULL) {
+    shutdown_webserver();
+  }
+  ESP_LOGI(TAG, "web server started");
   httpd_config_t config = HTTPD_DEFAULT_CONFIG();
   config.lru_purge_enable = true;
-  char *buffer = (char *)calloc(1024, sizeof(char));
+  g_user_ctx = (char *)calloc(1024, sizeof(char));
   const httpd_uri_t wificonfig_post = {.uri = "/wificonfig",
                                        .method = HTTP_POST,
                                        .handler = wificonfig_handler,
-                                       .user_ctx = buffer};
+                                       .user_ctx = g_user_ctx};
 
   const httpd_uri_t wificonfig_get = {.uri = "/wificonfig",
                                       .method = HTTP_GET,
@@ -130,6 +165,13 @@ void start_webserver(void) {
 }
 
 void shutdown_webserver(void) {
-  if (server != NULL) httpd_stop(server);
-  server = NULL;
+  if (server != NULL) {
+    ESP_LOGI(TAG, "shutdown web server");
+    httpd_stop(server);
+    if (g_user_ctx != NULL) {
+      free(g_user_ctx);
+      g_user_ctx = NULL;
+    }
+    server = NULL;
+  }
 }

@@ -1,7 +1,7 @@
 /*
  * @Author: Caffreyfans
  * @Date: 2021-06-18 00:33:23
- * @LastEditTime: 2021-06-23 23:54:32
+ * @LastEditTime: 2021-06-26 17:02:06
  * @Description:
  */
 /* HTTP GET Example using plain POSIX sockets
@@ -60,9 +60,6 @@ void app_main(void) {
   // Use settings defined above to initialize and mount SPIFFS filesystem.
   // Note: esp_vfs_spiffs_register is an all-in-one convenience function.
   esp_vfs_spiffs_register(&conf);
-  wifi_start_ap();
-  // wifi_start_station("NEAL", "11111111");
-  start_webserver();
   get_system_info_handle();
   // xTaskCreate(&http_get_task, "http_get_task", 4096, NULL, 5, NULL);
 }

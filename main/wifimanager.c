@@ -1,7 +1,7 @@
 /*
  * @Author: Caffreyfans
  * @Date: 2021-06-20 14:16:30
- * @LastEditTime: 2021-06-24 00:30:12
+ * @LastEditTime: 2021-06-26 23:17:40
  * @Description:
  */
 #include "wifimanager.h"
@@ -22,18 +22,38 @@
 #include "esp_event.h"
 #include "esp_log.h"
 #include "esp_system.h"
+#include "web.h"
 #define AP_CHANNEL 1
 #define MAX_STATION_CONNECTION 2
 #define WIFI_CONNECTED_BIT BIT0
 #define WIFI_FAIL_BIT BIT1
+#define WIFI_CONFIG_PATH "wifi"
 static const char *TAG = "WIFI";
 
 static TaskHandle_t dns_server = NULL;
 static EventGroupHandle_t s_wifi_event_group;
-static void event_handler(void *arg, esp_event_base_t event_base,
-                          int32_t event_id, void *event_data) {
-  xEventGroupSetBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
+esp_netif_t *g_station_netif = NULL;
+wifi_config_t sta_config = {
+    .sta = {.threshold.authmode = WIFI_AUTH_WPA2_PSK,
+            .pmf_cfg = {.capable = true, .required = false}},
+};
+static esp_err_t wifi_event_handler(void *user_parameter,
+                                    system_event_t *event) {
+  switch (event->event_id) {
+    case SYSTEM_EVENT_STA_GOT_IP:
+      xEventGroupSetBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
+      esp_wifi_set_mode(WIFI_MODE_STA);
+      start_webserver();
+      break;
+    case SYSTEM_EVENT_AP_START:
+      start_webserver();
+      break;
+    default:
+      break;
+  }
+  return ESP_OK;
 }
+
 void dns_server_task(void *pvParameters) {
   int socket_fd;
   struct sockaddr_in sa, ra;
@@ -162,11 +182,11 @@ static char *get_chip_id() {
   mac_str[mac_str_len] = 0x00;
   return mac_str;
 }
+
 bool wifi_start_ap() {
   char *chip_id = get_chip_id();
-  char ssid[11];
-  snprintf(ssid, 11, "ESP_%s", chip_id);
-  ssid[10] = 0x00;
+  char ssid[52];
+  snprintf(ssid, 52, "IRbaby_%s", chip_id);
   free(chip_id);
   wifi_config_t wifi_config = {
       .ap = {.ssid_len = strlen(ssid),
@@ -183,17 +203,11 @@ bool wifi_start_ap() {
 }
 
 bool wifi_start_station(const char *ssid, const char *pass) {
-  s_wifi_event_group = xEventGroupCreate();
   esp_event_handler_instance_t instance_got_ip;
-  esp_event_handler_instance_register(IP_EVENT, IP_EVENT_STA_GOT_IP,
-                                      &event_handler, NULL, &instance_got_ip);
-  wifi_config_t wifi_config = {
-      .sta = {.threshold.authmode = WIFI_AUTH_WPA2_PSK,
-              .pmf_cfg = {.capable = true, .required = false}},
-  };
-  strcpy((char *)wifi_config.sta.ssid, ssid);
-  strcpy((char *)wifi_config.sta.password, pass);
-  esp_wifi_set_config(WIFI_IF_STA, &wifi_config);
+
+  strcpy((char *)sta_config.sta.ssid, ssid);
+  strcpy((char *)sta_config.sta.password, pass);
+  esp_wifi_set_config(WIFI_IF_STA, &sta_config);
   esp_wifi_connect();
   /* Waiting until either the connection is established (WIFI_CONNECTED_BIT) or
    * connection failed for the maximum number of re-tries (WIFI_FAIL_BIT). The
@@ -202,20 +216,16 @@ bool wifi_start_station(const char *ssid, const char *pass) {
                                          pdFALSE, pdFALSE, pdMS_TO_TICKS(2000));
 
   /* The event will not be processed after unregister */
-  ESP_ERROR_CHECK(esp_event_handler_instance_unregister(
-      IP_EVENT, IP_EVENT_STA_GOT_IP, instance_got_ip));
-  vEventGroupDelete(s_wifi_event_group);
   /* xEventGroupWaitBits() returns the bits before the call returned, hence we
    * can test which event actually happened. */
   if (bits & WIFI_CONNECTED_BIT) {
-    ESP_LOGI(TAG, "connected");
-    esp_wifi_set_mode(WIFI_MODE_STA);
+    esp_wifi_set_storage(WIFI_STORAGE_FLASH);
     return true;
   } else {
-    ESP_LOGI(TAG, "connect failed");
     return false;
   }
 }
+
 uint8_t wifi_scan_ap(wifi_ap_record_t *ap_infos, const uint8_t size) {
   uint16_t number = size;
   uint16_t ap_count = 0;
@@ -223,8 +233,6 @@ uint8_t wifi_scan_ap(wifi_ap_record_t *ap_infos, const uint8_t size) {
     return ap_count;
   }
 
-  wifi_mode_t origin;
-  esp_wifi_get_mode(&origin);
   esp_wifi_scan_start(NULL, true);
   esp_wifi_scan_get_ap_records(&number, ap_infos);
   esp_wifi_scan_get_ap_num(&ap_count);
@@ -232,8 +240,21 @@ uint8_t wifi_scan_ap(wifi_ap_record_t *ap_infos, const uint8_t size) {
 }
 
 void wifi_init() {
-  esp_netif_create_default_wifi_ap();
-  esp_netif_create_default_wifi_sta();
+  s_wifi_event_group = xEventGroupCreate();
+  esp_netif_init();
+  esp_event_loop_init(wifi_event_handler, NULL);
   wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-  ESP_ERROR_CHECK(esp_wifi_init(&cfg));
+  esp_wifi_init(&cfg);
+  esp_netif_create_default_wifi_ap();
+  g_station_netif = esp_netif_create_default_wifi_sta();
+  esp_wifi_start();
+  wifi_config_t sta_config;
+  if (esp_wifi_get_config(WIFI_IF_STA, &sta_config) == ESP_OK) {
+    esp_wifi_set_config(WIFI_IF_STA, &sta_config);
+    if (esp_wifi_connect() != ESP_OK) {
+      wifi_start_ap();
+    }
+  } else {
+    wifi_start_ap();
+  }
 }
