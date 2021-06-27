@@ -1204,6 +1204,8 @@ path='#path#' key='#key#' render='#render#'>\
 			log("init_page: hash->" + hash);
 			var _handler = function (resp) {
 				var j = JSON.parse(resp);
+				log("root:");
+				log(j);
 				gen_root(j);
 				if (!page[hash]) {
 					document.body.scrollTop = document.documentElement.scrollTop = 0;
@@ -1454,6 +1456,7 @@ path='#path#' key='#key#' render='#render#'>\
 		page_init();
 	</script>
 	<script src="https://cdn.jsdelivr.net/npm/echarts@4.8.0/dist/echarts.common.min.js" defer async></script>
+	<script src="irext.js"></script>
 </body>
 
 </html>

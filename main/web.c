@@ -1,7 +1,7 @@
 /*
  * @Author: Caffreyfans
  * @Date: 2021-06-19 15:57:08
- * @LastEditTime: 2021-06-26 23:52:35
+ * @LastEditTime: 2021-06-27 20:57:27
  * @Description:
  */
 #include "web.h"
@@ -20,6 +20,7 @@ static const char *TAG = "WEB";
 extern const char wificonfig_html[] asm("_binary_wificonfig_html_start");
 extern const char root_html[] asm("_binary_root_html_start");
 extern const char config_json[] asm("_binary_config_json_start");
+extern const char irext_js[] asm("_binary_irext_js_start");
 
 static esp_err_t index_handler(httpd_req_t *req) {
   const int query_buffer_size = 128;
@@ -128,6 +129,11 @@ static esp_err_t wificonfig_handler(httpd_req_t *req) {
   return ESP_OK;
 }
 
+static esp_err_t irext_handler(httpd_req_t *req) {
+  httpd_resp_sendstr(req, (char *)req->user_ctx);
+  return ESP_OK;
+}
+
 static httpd_handle_t server = NULL;
 static char *g_user_ctx = NULL;
 void start_webserver(void) {
@@ -158,6 +164,12 @@ void start_webserver(void) {
                                  .method = HTTP_GET,
                                  .handler = index_handler,
                                  .user_ctx = (void *)config_json};
+
+  const httpd_uri_t irext = {.uri = "/irext.js",
+                             .method = HTTP_GET,
+                             .handler = irext_handler,
+                             .user_ctx = (void *)irext_js};
+
   ESP_LOGI(TAG, "Starting server on port: '%d'", config.server_port);
   if (httpd_start(&server, &config) == ESP_OK) {
     // Set URL handlers
@@ -166,6 +178,7 @@ void start_webserver(void) {
     httpd_register_uri_handler(server, &wificonfig_get);
     httpd_register_uri_handler(server, &root);
     httpd_register_uri_handler(server, &index_get);
+    httpd_register_uri_handler(server, &irext);
   }
 }
 
