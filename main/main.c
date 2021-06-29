@@ -1,7 +1,7 @@
 /*
  * @Author: Caffreyfans
  * @Date: 2021-06-18 00:33:23
- * @LastEditTime: 2021-06-26 23:53:41
+ * @LastEditTime: 2021-06-29 23:21:59
  * @Description:
  */
 /* HTTP GET Example using plain POSIX sockets
@@ -34,18 +34,6 @@
 #include "wifimanager.h"
 #include "handler.h"
 static const char *TAG = "IRbaby";
-static void http_get_task(void *params) {
-  (void)params;
-  t_remote_ac_status status = {
-      .ac_power = AC_POWER_ON,
-      .ac_temp = AC_TEMP_16,
-      .ac_mode = AC_MODE_COOL,
-      .ac_wind_dir = AC_SWING_ON,
-      .ac_wind_speed = AC_WS_AUTO,
-  };
-  irbaby_send("new_ac_2582", &status);
-  vTaskDelete(NULL);
-}
 
 void app_main(void) {
   ESP_ERROR_CHECK(nvs_flash_init());

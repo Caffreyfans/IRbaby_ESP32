@@ -1,0 +1,1462 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+	<meta name="viewport"
+		content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0 , viewport-fit=cover"
+		charset="utf-8">
+	<meta name="apple-mobile-web-app-title" content="WEBRENDER">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="default">
+	<meta name="format-detection" content="telephone=no">
+	<link rel="icon" href="data:image/ico;base64,aWNv">
+	<link rel="apple-touch-icon" href="./icon.png">
+	<style type="text/css">
+		:root {
+			--color-primary: #07c160;
+			--height-cell: 44px;
+			--padding-horizontal: 16px;
+			--color-active: #ececec;
+			/* 点击时颜色 */
+			--color-divider: #eeeeee;
+			--size-loading: 34px;
+			--color-link: #576b95;
+			--color-arrow: #a6a6a6;
+			--size-tabbar-icon: 28px;
+			--color-tab-item: #cccccc;
+			--color-tab-item-on: #07c160;
+			--color-text-2: #888;
+			--color-text-1: #111;
+		}
+
+		* {
+			padding: 0;
+			margin: 0;
+			text-decoration: none;
+			-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+			-webkit-appearance: none;
+		}
+
+		html {
+			-ms-text-size-adjust: 100%;
+			-webkit-text-size-adjust: 100%;
+			-webkit-user-select: none;
+			user-select: none;
+		}
+
+		body {
+			font-family: -apple-system-font, microsoft yahei, Helvetica Neue, sans-serif;
+			background-color: #ededed;
+			color: var(--color-text-1);
+		}
+
+		.ui_titlebar {
+			position: fixed;
+			z-index: 500;
+			top: 0;
+			width: 100%;
+			height: 44px;
+			line-height: 44px;
+			background-color: #FFF;
+		}
+
+		.ui_titlebar:after {
+			content: " ";
+			position: absolute;
+			left: 0;
+			bottom: 0;
+			right: 0;
+			height: 1px;
+			border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+			color: rgba(0, 0, 0, 0.1);
+			-webkit-transform-origin: 0 100%;
+			transform-origin: 0 100%;
+			-webkit-transform: scaleY(0.5);
+			transform: scaleY(0.5);
+		}
+
+		.ui_titlebar_text {
+			width: 100%;
+			position: absolute;
+			pointer-events: none;
+			top: 0;
+			text-align: center;
+			color: #000000;
+			font-size: 17px;
+			font-weight: 500;
+		}
+
+		.ui_cells {
+			margin-top: 22px;
+			background-color: #fff;
+			font-size: 17px;
+			position: relative;
+		}
+
+		.ui_cells:before {
+			content: " ";
+			position: absolute;
+			left: 0;
+			top: 0;
+			right: 0;
+			height: 1px;
+			border-top: 1px solid var(--color-divider);
+			color: rgba(0, 0, 0, 0.1);
+			-webkit-transform-origin: 0 0;
+			transform-origin: 0 0;
+			-webkit-transform: scaleY(0.5);
+			transform: scaleY(0.5);
+		}
+
+		.ui_cells:after {
+			content: " ";
+			position: absolute;
+			left: 0;
+			bottom: 0;
+			right: 0;
+			height: 1px;
+			border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+			color: rgba(0, 0, 0, 0.1);
+			-webkit-transform-origin: 0 100%;
+			transform-origin: 0 100%;
+			-webkit-transform: scaleY(0.5);
+			transform: scaleY(0.5);
+		}
+
+		.ui_cells__title {
+			margin-top: 16px;
+			margin-bottom: 4px;
+			padding-left: 16px;
+			padding-right: 16px;
+			color: var(--color-text-2);
+			font-size: 14px;
+		}
+
+		.ui_cells__title+.ui_cells {
+			margin-top: 0px;
+		}
+
+		.ui_cells__tip {
+			margin-top: 4px;
+			color: #999;
+			padding-left: var(--padding-horizontal);
+			padding-right: var(--padding-horizontal);
+			font-size: 14px;
+		}
+
+		.ui_cell {
+			padding: 0px var(--padding-horizontal);
+			position: relative;
+			display: flex;
+			align-items: center;
+			height: var(--height-cell);
+		}
+
+		.ui_cell:before {
+			content: " ";
+			position: absolute;
+			left: 0;
+			top: 0;
+			right: 0;
+			height: 1px;
+			border-top: 1px solid var(--color-divider);
+			-webkit-transform-origin: 0 0;
+			transform-origin: 0 0;
+			-webkit-transform: scaleY(0.5);
+			transform: scaleY(0.5);
+			left: 16px;
+		}
+
+		.ui_cell:first-child:before {
+			display: none;
+		}
+
+		.ui_cell__bd {
+			flex: 1;
+		}
+
+		.ui_cell__ft {
+			display: flex;
+			flex: 0;
+			color: var(--color-text-2);
+			white-space: nowrap;
+		}
+
+		.ui_cell_access {
+			color: inherit;
+		}
+
+		.ui_cell_access:active,
+		.ui_cell__select:active {
+			background-color: #ececec;
+		}
+
+		.ui_cell_link {
+			color: #576b95;
+		}
+
+		.ui_cell_access .ui_cell__ft {
+			padding-right: 22px;
+			position: relative;
+		}
+
+		.ui_cell_access .ui_cell__ft:after {
+			content: "";
+			width: 8px;
+			height: 8px;
+			position: absolute;
+			top: 50%;
+			right: 0;
+			margin-top: -4px;
+			position: absolute;
+			border-top: 1.6px solid var(--color-arrow);
+			border-right: 1.6px solid var(--color-arrow);
+			transform: rotate(45deg);
+			transform-origin: 50% 50%;
+		}
+
+		.ui_input {
+			width: 100%;
+			border: 0;
+			outline: 0;
+			-webkit-appearance: none;
+			background-color: transparent;
+			font-size: inherit;
+			color: inherit;
+		}
+
+		.ui_input::-webkit-outer-spin-button,
+		.ui_input::-webkit-inner-spin-button {
+			-webkit-appearance: none;
+			margin: 0;
+		}
+
+		.ui_cell__hd {
+			position: relative;
+		}
+
+		.ui_cell__hd+.ui_cell__bd {
+			padding-left: 16px;
+		}
+
+		.ui_btn {
+			margin: var(--padding-horizontal) 20px 0px;
+			height: var(--height-cell);
+			box-sizing: border-box;
+			font-size: 17px;
+			color: #fff;
+			border-radius: 4px;
+			background-color: #07c160;
+		}
+
+		button {
+			border-width: 0;
+			outline: 0;
+		}
+
+		.ui_btn:active {
+			background-color: #06ae56;
+		}
+
+		.ui_footer {
+			color: rgba(0, 0, 0, 0.3);
+			font-size: 14px;
+			text-align: center;
+			background-color: #ededed;
+		}
+
+		.ui_footer a {
+			color: #576b95;
+		}
+
+		.ui_footer_fixed-bottom {
+			position: fixed;
+			bottom: 0;
+			left: 0;
+			right: 0;
+			padding-top: 8px;
+			padding-bottom: 16px;
+			padding-bottom: calc(16px + env(safe-area-inset-bottom));
+			left: env(safe-area-inset-left);
+			right: env(safe-area-inset-right);
+		}
+
+		.ui_footer__link {
+			display: inline-block;
+			margin: 2px 8px;
+			position: relative;
+			font-size: 14px;
+		}
+
+		.ui_footer__text {
+			padding: 2px 16px;
+			font-size: 12px;
+		}
+
+		.ui_switch {
+			-webkit-appearance: none;
+			appearance: none;
+			position: relative;
+			width: 52px;
+			height: 32px;
+			border: 2px solid rgba(0, 0, 0, 0.1);
+			outline: 0;
+			border-radius: 16px;
+			box-sizing: border-box;
+			-webkit-transition: background-color 0.1s, border 0.1s;
+			transition: background-color 0.1s, border 0.1s;
+		}
+
+		.ui_switch:before {
+			content: " ";
+			position: absolute;
+			top: 0;
+			left: 0;
+			bottom: 0;
+			right: 0;
+			border-radius: 15px;
+			background-color: #f7f7f7;
+			transition: transform 0.3s cubic-bezier(0.45, 1, 0.4, 1);
+		}
+
+		.ui_switch:after {
+			content: " ";
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 28px;
+			height: 28px;
+			border-radius: 15px;
+			background-color: #fff;
+			box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+			transition: transform 0.3s cubic-bezier(0.4, 0.4, 0.25, 1.35);
+		}
+
+		.ui_switch:checked {
+			border-color: #07c160;
+			background-color: #07c160;
+		}
+
+		.ui_switch:checked:before {
+			transform: scale(0);
+		}
+
+		.ui_switch:checked:after {
+			transform: translateX(20px);
+		}
+
+		.ui_content {
+			padding-top: 44px;
+			padding-bottom: calc(98px + env(safe-area-inset-bottom));
+			padding-left: env(safe-area-inset-left);
+			padding-right: env(safe-area-inset-right);
+			display: flex;
+			flex-direction: column;
+			align-items: stretch;
+		}
+
+		.ui_tabcontent {
+			display: flex;
+			flex-direction: column;
+			align-items: stretch;
+		}
+
+		.ui_toptips {
+			display: block;
+			opacity: 0;
+			position: fixed;
+			top: 8px;
+			left: 8px;
+			right: 8px;
+			padding: 10px;
+			border-radius: 8px;
+			font-size: 14px;
+			text-align: center;
+			color: #fff;
+			z-index: 15000;
+			word-wrap: break-word;
+			word-break: break-all;
+			pointer-events: none;
+			transition: opacity 0.15s linear;
+		}
+
+		.ui_toptips_warn {
+			background-color: #fa5151;
+		}
+
+		.ui_toast {
+			position: fixed;
+			opacity: 0;
+			top: 40%;
+			left: 50%;
+			-webkit-transform: translate(-50%, -50%);
+			transform: translate(-50%, -50%);
+			width: 120px;
+			height: 120px;
+			border-radius: 8px;
+			font-size: 17px;
+			text-align: center;
+			color: #fff;
+			z-index: 5000;
+			word-wrap: break-word;
+			word-break: break-all;
+			pointer-events: none;
+			background-color: rgba(76, 76, 76, 0.9);
+			transition: opacity 0.15s linear;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			/*子内容垂直居中*/
+			align-items: center;
+			/*子内容水平居中*/
+		}
+
+		.ui_toast_show {
+			opacity: 1;
+		}
+
+		.ui_toast__content {
+			font-size: 14px;
+			margin-top: 14px;
+		}
+
+		@keyframes loading-rotate {
+			0% {
+				transform: rotate(0deg);
+			}
+
+			100% {
+				transform: rotate(360deg);
+			}
+		}
+
+		.ui_loading {
+			display: block;
+			border: 4px solid #999999;
+			border-left-color: var(--color-primary);
+			border-radius: 50%;
+			width: var(--size-loading);
+			height: var(--size-loading);
+			animation: loading-rotate 0.5s linear infinite;
+			transform-origin: 50% 50%;
+		}
+
+		.ui_cell__select {
+			display: flex;
+			align-items: center;
+			padding-left: var(--padding-horizontal);
+			padding-right: 8px;
+		}
+
+		.ui_cell__select:last-child {
+			padding-right: 0px;
+		}
+
+		.ui_cell__select::after {
+			content: "";
+			width: 0;
+			height: 0;
+			border-top: 6px solid;
+			border-right: 5px solid transparent;
+			border-left: 5px solid transparent;
+			color: #a6a6a6;
+			pointer-events: none;
+		}
+
+		.ui_select {
+			text-decoration: none;
+			border: none;
+			outline: 0;
+			background-color: transparent;
+			font-size: inherit;
+			height: var(--height-cell);
+			max-width: 140px;
+			color: var(--color-link);
+			padding-right: 6px;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+			overflow: hidden;
+		}
+
+		option {
+			max-width: 140px;
+		}
+
+		.ui_cell_chart {
+			height: 200px;
+			overflow: hidden;
+		}
+
+		.ui_back {
+			width: 44px;
+			height: 44px;
+			background-color: transparent;
+			transition: opacity 0.1s linear;
+		}
+
+		.ui_back::after {
+			content: "";
+			position: absolute;
+			left: 16px;
+			top: 50%;
+			margin-top: -6px;
+			width: 12px;
+			height: 12px;
+			border-top: 2px solid #555;
+			border-left: 2px solid #555;
+			color: #a6a6a6;
+			transform: rotate(-45deg);
+			transform-origin: 50% 50%;
+		}
+
+		.ui_back:active {
+			opacity: 0.6;
+		}
+
+		.ui_grid {
+			padding: 0px;
+			height: 90px;
+		}
+
+		.ui_grid__item {
+			position: relative;
+			display: flex;
+			flex: 1;
+			height: 100%;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+		}
+
+		.ui_grid__item::before {
+			content: " ";
+			position: absolute;
+			left: 0;
+			top: 0;
+			width: 1px;
+			bottom: 0;
+			border-left: 1px solid var(--color-divider);
+			transform-origin: 0 0;
+			transform: scaleX(0.5);
+		}
+
+		.ui_grid__item:first-child:before {
+			display: none;
+		}
+
+		.ui_grid__item_content {
+			font-size: 30px;
+		}
+
+		.ui_grid__item_label {
+			font-size: 30px;
+			color: var(--color-text-2);
+			font-size: 14px;
+			margin-top: 3px;
+		}
+
+		.ui_tabbar {
+			display: flex;
+			z-index: 500;
+			position: fixed;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background-color: #f7f7f7;
+		}
+
+		.ui_tabbar:before {
+			content: " ";
+			position: absolute;
+			left: 0;
+			top: 0;
+			right: 0;
+			height: 1px;
+			border-top: 1px solid rgba(0, 0, 0, 0.1);
+			color: rgba(0, 0, 0, 0.1);
+			transform-origin: 0 0;
+			transform: scaleY(0.5);
+		}
+
+		.ui_tabbar__item {
+			flex: 1;
+			padding: 8px 0;
+			padding-bottom: calc(8px + env(safe-area-inset-bottom));
+			font-size: 10px;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+		}
+
+		.ui_tabbar__icon {
+			width: var(--size-tabbar-icon);
+			height: var(--size-tabbar-icon);
+			position: relative;
+		}
+
+		.ui_tabbar__icon::before {
+			position: absolute;
+			content: " ";
+			top: 2px;
+			left: 2px;
+			right: 2px;
+			bottom: 2px;
+			border: 1px solid var(--color-tab-item);
+			border-radius: 20%;
+			display: block;
+		}
+
+		.ui_tabbar__icon::after {
+			position: absolute;
+			content: " ";
+			top: 8px;
+			left: 8px;
+			right: 8px;
+			bottom: 8px;
+			border: 1px solid var(--color-tab-item);
+			border-radius: 50%;
+			color: #fff;
+		}
+
+		.ui_bar__item_on .ui_tabbar__icon::after,
+		.ui_bar__item_on .ui_tabbar__icon::before {
+			border-color: var(--color-primary);
+		}
+
+		.ui_tabbar__label {
+			color: rgba(0, 0, 0, 0.9);
+			font-size: 10px;
+			line-height: 1.4;
+			margin-top: 2px;
+		}
+
+		.ui_bar__item_on .ui_tabbar__label {
+			color: var(--color-primary);
+		}
+
+		.ui__hidden {
+			display: none;
+		}
+
+		.ui_message {
+			position: fixed;
+			opacity: 0;
+			top: 40%;
+			left: 50%;
+			-webkit-transform: translate(-50%, -50%);
+			transform: translate(-50%, -50%);
+			padding: 20px;
+			width: 210px;
+			border-radius: 8px;
+			font-size: 17px;
+			text-align: center;
+			color: #fff;
+			z-index: 5000;
+			word-wrap: break-word;
+			word-break: break-all;
+			pointer-events: none;
+			background-color: rgba(76, 76, 76, 0.9);
+			-webkit-transition: all 0.1s linear;
+			transition: all 0.1s linear;
+		}
+
+		.ui_opacity_1 {
+			opacity: 1;
+		}
+	</style>
+	<title>
+		WEBRENDER
+	</title>
+</head>
+
+<body ontouchstart="">
+	<div class="ui_toptips ui_toptips_warn" id="id_toptips">
+	</div>
+	<div class="ui_toast" id="id_toast">
+		<div class="ui_loading"></div>
+	</div>
+	<div class="ui_message" id="id_message">
+	</div>
+	<div class="ui_titlebar">
+		<p id="id_titlebar" class="ui_titlebar_text"> </p>
+		<button id="id_back" class="ui_back" style="display: none;" onclick="history.back()"></button>
+	</div>
+	<div class='ui_content' id='id_main'>
+	</div>
+	<div class="ui_footer ui_footer_fixed-bottom ui__hidden" id="id_footer">
+		<a href="javascript:page_sync();" class="ui_footer__link">SYNC</a>
+		<p class="ui_footer__text">Power by: Caffreyfans</p>
+	</div>
+	<div class="ui_tabbar ui__hidden" id="id_tabbar" ontouchmove="event.preventDefault()">
+	</div>
+	<script type="text/javascript">
+		String.prototype.replaceAll = function (rgExp, replaceText) {
+			return this.replace(new RegExp(rgExp, "gm"), replaceText);
+		}
+		function log(msg) {
+			console.log(msg);
+		}
+		function show_ele(ele) {
+			ele.classList.remove('ui__hidden');
+		}
+		function hide_ele(ele) {
+			ele.classList.add('ui__hidden');
+		}
+		function isEmptyString(str) {
+			if (typeof str == "undefined" || str == null || str == "") {
+				return true;
+			}
+			return false;
+		}
+		function getAttributePlus(obj, attr, defaultValue) {
+			return obj.hasOwnProperty(attr) ? obj[attr] : defaultValue;
+		}
+		function sendGetObject(path, obj, handler, timeout) {
+			var params = "?";
+			for (var k in obj) {
+				params += (k + "=" + obj[k] + "&");
+			}
+			if (params.endsWith("&")) {
+				params = params.substr(0, params.length - 1);
+			}
+			sendGet(path, params, "...", handler, timeout);
+		}
+		var ele_toast = document.getElementById("id_toast");
+		var ele_toptips = document.getElementById("id_toptips");
+		var ele_message = document.getElementById("id_message");
+		var ele_toptips_timer = null;
+		var ele_message_timer = null;
+		function toastShow(show) {
+			if (show) {
+				ele_toast.classList.add('ui_opacity_1');
+			} else {
+				ele_toast.classList.remove('ui_opacity_1');
+			}
+		}
+		function toptipsShow(show, text) {
+			if (show) {
+				toptipsShow(false);
+				ele_toptips.innerHTML = text;
+				ele_toptips.classList.add('ui_opacity_1');
+				ele_toptips_timer = setTimeout(() => {
+					toptipsShow(false);
+				}, 2000);
+			} else {
+				if (ele_toptips_timer) {
+					clearTimeout(ele_toptips_timer);
+					ele_toptips_timer = null;
+				}
+				ele_toptips.classList.remove('ui_opacity_1');
+			}
+		}
+		function messageShow(show, text) {
+			if (show) {
+				messageShow(false);
+				ele_message.innerHTML = text;
+				ele_message.classList.add('ui_opacity_1');
+				ele_message_timeout_func = setTimeout(() => {
+					messageShow(false);
+				}, 2000);
+			} else {
+				if (ele_message_timer) {
+					clearTimeout(ele_message_timer);
+					ele_message_timer = null;
+				}
+				ele_message.classList.remove('ui_opacity_1');
+			}
+		}
+		const href = window.location.href;
+		const local_mode = (href.startsWith("http://127.0.0.1")
+			|| href.indexOf(":5500") > 0 || !href.startsWith("http"));
+		const timeout_default = 10 * 1000;//10s
+		function sendGet(path, params, toast, handler, timeout) {
+			var xhr = new XMLHttpRequest();
+			if (timeout) {
+				xhr.timeout = timeout;
+			} else {
+				xhr.timeout = timeout_default;
+			}
+			log("HTTP timeout: " + xhr.timeout);
+			xhr.responseType = "text";
+			if (!path.startsWith('/')) {
+				path = '/' + path;
+			}
+			path += params;
+			if (local_mode) {
+				xhr.open('GET', path, true);
+			} else {
+				xhr.open('GET', path, true);
+			}
+			xhr.onload = function (e) {
+				if (this.status == 200) {
+					const res = this.responseText;
+					if (res.length < 300) {
+						log("GET: " + path + " res->\n" + res);
+					} else {
+						log("GET: " + path + " res->\n" + res.substr(0, 100) + "...");
+					}
+					toastShow(false);
+					if (handler) {
+						handler(res);
+					}
+				} else {
+					toptipsShow(true, "[" + this.status + "] " + path);
+				}
+			};
+			xhr.ontimeout = function (e) {
+				toptipsShow(true, "[Network timeout] " + path);
+				log("error-> timeout");
+			};
+			xhr.onerror = function (e) {
+				toptipsShow(true, "[Network error] " + path);
+				log("error->" + e);
+			};
+			xhr.onloadend = function (e) {
+				toastShow(false);
+			}
+			toptipsShow(false);
+			toastShow(true);
+			xhr.send(null);
+		}
+		function langIsZh() {
+			var language = (navigator.browserLanguage || navigator.language).toLowerCase();
+			if (language.indexOf('zh') > -1) {
+				return true;
+			} else if (language.indexOf('en') > -1) {
+				return false;
+			}
+			return false;
+		}
+		function hasFunction(fn) {
+			try {
+				if (fn && typeof (fn) == "function") {
+					return true;
+				}
+			} catch (e) {
+			}
+			return false;
+		}
+	</script>
+	<script>
+		var TEMPLATE_CELLS = "<div class='ui_cells'>#cells#</div>"
+		var TEMPLATE_CELL_SWITCH = "<div class='ui_cell'> \
+<div class='ui_cell__bd'>#label#</div> \
+<input class='ui_switch' path='#path#' key='#key#' render='#render#' \
+type='checkbox' onclick='ele_click(this)' /> \
+</div>"; //checked=''
+		var TEMPLATE_CELL_TEXT = "<div class='ui_cell'>  \
+<div class='ui_cell__bd'>#label#</div> \
+<div class='ui_cell__ft' key='#key#' render='#render#' onclick='ele_click(this)'></div> \
+</div>";
+		var TEMPLATE_CELL_SELECT = "<div class='ui_cell'> \
+<div class='ui_cell__bd'>#label#</div> \
+<div class='ui_cell__select'> \
+<select class='ui_select' path='#path#' key='#key#' render='#render#' \
+onchange='ele_click(this)' > \
+#options# \
+</select> \
+</div> \
+</div>";
+		var TEMPLATE_CELL_SELECT_OPTION = "<option value='#value#'>#label#</option>";
+		var TEMPLATE_TITLE = "<div class='ui_cells__title'>#label#</div>";
+		var TEMPLATE_CELL_URL = "<div class='ui_cell ui_cell_access' \
+path='#path#' key='#key#' confirm='#confirm#' timeout='#timeout#' render='#render#' onclick='ele_click(this)'>\
+<div class='ui_cell__bd'>#label#</div> \
+<div class='ui_cell__ft'></div> \
+</div>";
+		var TEMPLATE_CELL_TIME = "<div class='ui_cell'> \
+<div class='ui_cell__bd'>#label#</div> \
+<div class='ui_cell__select'> \
+<select class='ui_select' path='#path_h#' key='#key_h#' render='#render#' onchange='ele_click(this)'> \
+#options_h# \
+</select> \
+</div> \
+<p>时</p> \
+<div class='ui_cell__select'> \
+<select class='ui_select' path='#path_m#' key='#key_m#' render='#render#' onchange='ele_click(this)'> \
+#options_m# \
+</select> \
+</div> \
+<p>分</p> \
+</div>";
+		var TEMPLATE_BUTTON = "<button class='ui_btn' path='#path#' key='#key#' confirm='#confirm#' render='#render#' onclick='ele_click(this)'>#label#</button>";
+		var TEMPLATE_TAB_ITEM =
+			"<div class='ui_tabbar__item' sync_count='0' onclick='tab_click(this)'> \
+<div class='ui_tabbar__icon'></div>\
+<p class='ui_tabbar__label'>#label#</p> \
+</div>";
+		var TEMPLATE_TAB_CONTENT = "<div class='ui_tabcontent'>#contents#</div>";
+		var TEMPLATE_TIP = "<div class='ui_cells__tip'>#label#</div>";
+		var TEMPLATE_CELL_GRIDS = "<div class='ui_cell ui_grid'>#grids#</div>";
+		var TEMPLATE_CELL_GRIDS_ITEM = "<div class='ui_grid__item' \
+path='#path#' key='#key#' render='#render#'>\
+<p class='ui_grid__item_content'>-</p>\
+<p class='ui_grid__item_label'>#label#</p>\
+</div>";
+		var TEMPLATE_CELL_ = "";
+		const ID_MAIN = "id_main"; //main div id
+		const ID_FOOTER = "id_footer";
+		const ID_TABBAR = "id_tabbar";
+		function ele_click(ele) {
+			var path = ele.getAttribute("path");
+			var key = ele.getAttribute("key");
+			var render = ele.getAttribute("render");
+			var node_name = ele.nodeName.toUpperCase();
+			log("cell_click: " + node_name + " render:" + render);
+			var value = "";
+			if (node_name === "INPUT" && render === "switch") {
+				value = ele.checked ? "1" : "0";
+			} else if (ele.nodeName === "SELECT") {
+				value = ele.options[ele.selectedIndex].getAttribute("value");
+			} else if (render === "url" || render === "button") {
+				if (key.startsWith("#")) {
+					window.location.hash = key;
+					return;
+				} else if (key.startsWith("http") ||
+					key.startsWith("/") ||
+					key.startsWith("./")) {
+					window.open(key);
+					return;
+				} else {
+					value = "1";
+				}
+			} else if (render === "text" && ele.nodeName === "DIV") {
+				var t = ele.innerHTML;
+				if (t.length > 20) {
+					alert(t);
+				}
+				return;
+			} else if (render === "chart") {
+				return;
+			}
+			path = get_window_hash();
+			var confirm_msg = ele.getAttribute("confirm");
+			log("confirm->" + confirm_msg);
+			if (confirm_msg != "#confirm#" && !isEmptyString(confirm_msg)) {
+				if (!confirm(confirm_msg)) {
+					return;
+				}
+			}
+			var timeout = ele.getAttribute("timeout");
+			if (timeout) {
+				timeout = parseInt(timeout);
+			}
+			log("ele timeout: " + timeout);
+			sendGetObject(path, { [key]: value }, function (resp) {
+				var json = JSON.parse(resp);
+				if (json.hasOwnProperty("__message__")) {
+					messageShow(true, json["__message__"]);
+				}
+				page_update_values(json);
+			}, timeout);
+		}
+		var tab_record = {};
+		function get_tab_record_index() {
+			var hash = get_window_hash();
+			if (tab_record.hasOwnProperty(hash)) {
+				log("get_tab_record_index, hash: " + hash + " ,index: " + tab_record[hash]);
+				return tab_record[hash];
+			}
+			return 0;
+		}
+		function tab_click(ele) {
+			var tabs = document.getElementById(ID_TABBAR).children;
+			var mains = document.getElementById(ID_MAIN).children;
+			for (var i = 0; i < tabs.length; i++) {
+				if (tabs[i] == ele) {
+					log("click tab: " + i);
+					var hash = get_window_hash();
+					tab_record[hash] = i;
+					if (tabs[i].classList.contains('ui_bar__item_on')) {
+						log("re-click tab: " + i + ", call page_sync()");
+						page_sync();
+						break;
+					}
+					tabs[i].classList.add('ui_bar__item_on');
+					mains[i].classList.remove('ui__hidden');
+					var sync_count = Number(tabs[i].getAttribute("sync_count"));
+					if (sync_count == 0) {
+						log("sync_count is 0, call page_sync()");
+						page_sync();
+					}
+				} else {
+					tabs[i].classList.remove('ui_bar__item_on');
+					mains[i].classList.add('ui__hidden');
+				}
+			}
+		}
+		function gen_content_cells(cells) {
+			var res = "";
+			if (cells.label != null && cells.label != "") {
+				res += TEMPLATE_TITLE.replace("#label#", cells.label);
+			}
+			var t = "";
+			for (var item of cells.cells) {
+				var c = "";
+				var render = item["render"];
+				log("item render: " + render);
+				if (render === "switch") {
+					c = TEMPLATE_CELL_SWITCH;
+				} else if (render === "text") {
+					c = TEMPLATE_CELL_TEXT;
+				} else if (render === "url") {
+					c = TEMPLATE_CELL_URL;
+				} else if (render === "select") {
+					c = TEMPLATE_CELL_SELECT;
+					var o = "";
+					if (item.hasOwnProperty("options")) {
+						for (var i = 0; i < item.options.length; i++) {
+							var oi = TEMPLATE_CELL_SELECT_OPTION;
+							oi = oi.replace("#label#", item.options[i].label);
+							oi = oi.replace("#value#", item.options[i].value);
+							o += oi;
+						}
+					} else {
+						log("no options in " + render);
+					}
+					c = c.replace("#options#", o);
+				} else if (render === "time") {
+					c = TEMPLATE_CELL_TIME;
+					var options_h = "";//hour
+					for (var i = 0; i < 24; i++) {
+						var oi = TEMPLATE_CELL_SELECT_OPTION;
+						oi = oi.replace("#label#", (i < 10) ? ("0" + i) : ("" + i));
+						oi = oi.replace("#value#", "" + i);
+						options_h += oi;
+					}
+					var options_m = "";//minute
+					for (var i = 0; i < 60; i++) {
+						var oi = TEMPLATE_CELL_SELECT_OPTION;
+						oi = oi.replace("#label#", (i < 10) ? ("0" + i) : ("" + i));
+						oi = oi.replace("#value#", "" + i);
+						options_m += oi;
+					}
+					c = c.replace("#options_h#", options_h);
+					c = c.replace("#options_m#", options_m);
+				} else if (render === "grids") {
+					c = TEMPLATE_CELL_GRIDS;
+					if (item.hasOwnProperty("grids")) {
+						var grids_html = "";
+						for (var g of item.grids) {
+							var g_html = TEMPLATE_CELL_GRIDS_ITEM;
+							for (var g_key in g) {
+								g_html = g_html.replace("#" + g_key + "#", g[g_key]);
+							}
+							grids_html += g_html;
+						}
+						c = c.replace("#grids#", grids_html);
+					}
+				}
+				for (var l in item) {//遍历item的属性
+					c = c.replace("#" + l + "#", item[l]);
+				}
+				t += c;
+			};
+			t = TEMPLATE_CELLS.replace("#cells#", t);
+			res += t;
+			return res;
+		}
+		function gen_content_button(button) {
+			var t = TEMPLATE_BUTTON;//.replace("#label#", button.label);
+			for (var k in button) {//遍历item的属性
+				t = t.replace("#" + k + "#", button[k]);
+			}
+			return t;
+		}
+		function gen_content_tip(tip) {
+			var t = TEMPLATE_TIP;
+			for (var k in tip) {
+				t = t.replace("#" + k + "#", tip[k]);
+			}
+			return t;
+		}
+		function page_update_values(values) {
+			for (var k in values) {
+				var ele = document.querySelector("[key=" + k + "]");
+				if (ele) {
+					var render = ele.getAttribute("render");
+					var node_name = ele.nodeName.toUpperCase();
+					if (render == "switch" && node_name == "INPUT") {//switch
+						ele.checked = parseInt(values[k]) > 0 || values[k] == "true";
+					} else if (render == "select") {//(node_name == "SELECT") {//select
+						var sel = ele;
+						for (var i = 0; i < sel.length; i++) {
+							if (sel[i].value == values[k]) { //如果这一项的文本内容为客厅
+								sel[i].selected = true; //选中这一项
+								break;
+							}
+						};
+					} else if (render == "text" && node_name == "DIV") {//text
+						ele.innerHTML = values[k];
+						log("text: " + values[k]);
+					} else if (render == "chart") {
+						if (typeof (render_chart_update) == "function") {
+							render_chart_update(ele, values[k]);
+						}
+					} else if (render == "grid") {
+						ele.children[0].innerHTML = values[k];
+					} else {
+						log("unknown render: " + render);
+					}
+				} else {
+					log("Error: not find the ele of key = " + k);
+				}
+			}
+		}
+		function gen_contents(contents) {
+			log("gen_contents, length: " + contents.length)
+			var t = "";
+			for (var item of contents) {
+				const render = item.render;
+				if (render == "cells") {
+					t += gen_content_cells(item);
+				} else if (render == "button") {
+					t += gen_content_button(item);
+				} else if (render == "tip") {
+					t += gen_content_tip(item);
+				} else if (render == "chart") {
+					if (typeof (gen_content_chart) == "function") {
+						t += gen_content_chart(item);
+					}
+				}
+			}
+			return t;
+		}
+		function gen_tabs(tabs) {
+			log("gen_tabs: " + tabs.length);
+			var tabbar = document.getElementById(ID_TABBAR);
+			tabbar.innerHTML = "";
+			var t = "";
+			for (var i = 0; i < tabs.length; i++) {
+				var item = tabs[i];
+				if (item.render == "contents") {
+					t += TEMPLATE_TAB_CONTENT.replace("#contents#", gen_contents(item.contents));
+				}
+				var tabbar_item = TEMPLATE_TAB_ITEM.replace("#label#", item.label);
+				tabbar.innerHTML += tabbar_item;
+			}
+			return t;
+		}
+		function gen_root(root) {
+			log("gen_root");
+			document.title = root.label;
+			document.getElementById("id_titlebar").innerHTML = root.label;
+			document.getElementsByTagName("meta")["apple-mobile-web-app-title"].setAttribute("content", root.label);
+			var tabbar = document.getElementById(ID_TABBAR);
+			var footer = document.getElementById(ID_FOOTER);
+			var main = document.getElementById(ID_MAIN);
+			main.innerHTML = "";
+			if (root.render == "contents") {// no tabbar
+				main.innerHTML = gen_contents(root.contents);
+				hide_ele(tabbar);
+				show_ele(footer);
+				page_sync();
+			} else if (root.render == "tabs") {
+				main.innerHTML = gen_tabs(root.tabs);
+				show_ele(tabbar);
+				hide_ele(footer);
+				var index = get_tab_record_index();
+				if (index < tabbar.children.length) {
+					tab_click(tabbar.children[index]);
+				} else {
+					tab_click(tabbar.children[0]);
+				}
+			}
+		}
+		function get_current_tab_index() {
+			var tabbar = document.getElementById(ID_TABBAR);
+			if (tabbar.classList.contains('ui__hidden')) {
+				return -1;
+			}
+			var tabs = document.getElementById(ID_TABBAR).children;
+			for (var i = 0; i < tabs.length; i++) {
+				if (tabs[i].classList.contains('ui_bar__item_on')) {
+					return i;
+				}
+			}
+			return -1;
+		}
+		function increase_tab_sync_count(tab_index) {
+			if (tab_index < 0) {
+				return;
+			}
+			var tab = document.getElementById(ID_TABBAR).children[tab_index];
+			var sync_count = Number(tab.getAttribute("sync_count"));
+			sync_count = sync_count + 1;
+			tab.setAttribute("sync_count", sync_count);
+			log("increase_tab_sync_count[" + tab_index + "] -> " + sync_count);
+		}
+		function page_sync() {
+			var path = "/" + get_window_hash();
+			var current_tab = get_current_tab_index();
+			log("page_sync, current_tab: " + current_tab);
+			increase_tab_sync_count(current_tab);
+			if (local_mode) {
+				path = "/" + get_window_hash() + "_sync.json";
+			}
+			sendGetObject(path, { sync: current_tab, tab: current_tab }, function (resp) {
+				page_update_values(JSON.parse(resp));
+			});
+		}
+		var page = {};
+		function page_init() {
+			var hash = get_window_hash();
+			log("init_page: hash->" + hash);
+			var _handler = function (resp) {
+				var j = JSON.parse(resp);
+				log("root:");
+				log(j);
+				gen_root(j);
+				if (!page[hash]) {
+					document.body.scrollTop = document.documentElement.scrollTop = 0;
+				}
+				page[hash] = j;
+			};
+			if (local_mode) {
+				sendGetObject("/" + hash + ".json", { page: hash },
+					_handler);
+			} else {
+				var path = hash;
+				sendGetObject(path, { page: hash },
+					_handler);
+			}
+		}
+		function get_window_hash(params) {
+			var hash = window.location.hash;
+			var back = document.getElementById("id_back");
+			if (hash == "" || hash == "#index") {
+				hash = "index";
+				back.style.display = 'none';
+			} else if (hash.startsWith("#")) {
+				hash = hash.substr(1, hash.length - 1);
+				back.style.display = 'block';
+			}
+			return hash;
+		}
+		window.onhashchange = function () {
+			log("onhashchange->" + window.location.hash);
+			page_init();
+		}
+		window.onload = function () {
+			page_init();
+		}
+	</script>
+	<script>
+		function chart_time_label(time) {
+			if (time.length == 16) {
+				return time.substr(5).replace(" ", "\n").replace("-", "/");
+			}
+			return time;
+		}
+		function chart_gen_option() {
+			var option = {
+				tooltip: {
+					show: true,
+					trigger: "none",
+					transitionDuration: 0,
+					position: function (point, params, dom, rect, size) {
+						return [point[0] - size.contentSize[0] / 2, 8]
+					},
+				},
+				grid: {
+					top: "40",
+					left: "40",
+					right: "40",
+					bottom: "40",
+					containLabel: false
+				},
+				xAxis: {
+					type: "category",
+					data: [],
+					boundaryGap: false,
+					axisPointer: {
+						show: true,
+						type: "line",
+						snap: true,
+						label: {
+							show: false,
+							formatter: function (params) {
+								var value = params.value;
+								return chart_time_label(value);
+							}
+						}
+					},
+					splitLine: {
+						show: true,
+						lineStyle: {
+							type: "dotted",
+						}
+					},
+					axisLabel: {
+						show: true,
+						formatter: function (value, index) {
+							return chart_time_label(value);
+						}
+					}
+				},
+				yAxis: {
+					type: "value",
+				},
+				series: [{
+					data: [],
+					type: "line",
+					smooth: false,
+					markPoint: {
+						symbol: "pin",
+						label: {},
+						data: [{
+							type: "max",
+						},
+						{
+							type: "min",
+						}],
+					},
+				}]
+			};
+			return option;
+		}
+		function chart_gen_for_dom(c, dom) {
+			var chart = echarts.getInstanceByDom(dom);
+			if (chart) {
+				log("chart_gen_for_dom [" + c + "] already exists");
+				return chart;
+			}
+			chart = echarts.init(dom);
+			chart.setOption(chart_gen_option());
+			var full_name = chart_fullname(c);
+			var min = null;
+			var max = null;
+			var interval = null;
+			var color = "#5B8EDC";
+			if (c == 'T') {
+				min = 0; max = 50; interval = 10;
+				color = "#D23531";
+			} else if (c == 'H') {
+				min = 0; max = 100; interval = 20;
+				color = "#5B8EDC";
+			} else if (c == 'L') {
+				min = 0; max = 1000; interval = 200;
+				color = "#CDA819";
+			}
+			chart.setOption({
+				color: [color],
+				yAxis: {
+					name: full_name,
+					min: min,
+					max: max,
+					interval: interval
+				},
+				series: [{
+					name: full_name,
+				}]
+			});
+			return chart;
+		}
+		var T_CHART = "\
+<div class='ui_cells'>\
+<div class='ui_cell'>\
+<div class='ui_cell__bd'>#label#</div>\
+<div class='ui_cell__select'>\
+<select class='ui_select' render='#render#' path='#path#' key='#key#' chart='#chart#' onchange='ele_click(this)'>\
+<option selected='' value='day'>day</option>\
+<option value='week'>week</option>\
+<option value='month'>month</option>\
+</select>\
+</div>\
+</div>\
+#children#\
+</div>";
+		var T_CHART_CHILD = "<div class='ui_cell ui_cell_chart'></div>";
+		function gen_content_chart(json) {
+			var t = T_CHART;
+			for (var k in json) {
+				t = t.replace("#" + k + "#", json[k]);
+			}
+			var c = json.chart;
+			if (c) {
+				var children = "";
+				for (var i = 0; i < c.length; i++) {
+					children += T_CHART_CHILD;
+				}
+				t = t.replace("#children#", children);
+			}
+			return t;
+		}
+		function chart_fullname(c) {
+			c.toUpperCase;
+			var map = langIsZh() ? { "T": "温度", "H": "湿度", "L": "光照" }
+				: { "T": "Temp", "H": "Humi", "L": "Light" };
+			var m = map[c];
+			if (m) { return m; }
+			return c;
+		}
+		function render_chart_update(ele, json) {
+			var sel = ele;
+			for (var i = 0; i < sel.length; i++) {
+				if (sel[i].value == json["range"]) { //如果这一项的文本内容为客厅
+					sel[i].selected = true; //选中这一项
+					log("chart select range: " + json["range"]);
+					break;
+				}
+			};
+			var rows = json["data"].split("\n");
+			log("chart rows: " + rows.length);
+			var cols = [];
+			for (var i = 0; i < rows.length; i++) {
+				var rs = rows[i].split(",");
+				log("rs length: " + rs.length);
+				if (rs.length <= 1) {
+					continue;
+				}
+				for (var j = 0; j < rs.length; j++) {
+					if (!cols[j]) {
+						cols[j] = [];
+					}
+					cols[j].push(rs[j]);
+				}
+			}
+			var chart_container = ele.parentNode.parentNode.parentNode;
+			var chart_name = ele.getAttribute("chart");
+			for (var i = 0; i < chart_name.length; i++) {
+				var c = chart_name.charAt(i).toUpperCase();
+				var echart = chart_gen_for_dom(c, chart_container.children[i + 1]);
+				echart.setOption({
+					xAxis: {
+						data: cols[0],
+					},
+					series: [{
+						type: "line",
+						data: cols[i + 1],
+					}]
+				});
+			}
+			chart_resize();
+		}
+		function chart_resize() {
+			var divs = document.querySelectorAll("div.ui_cell_chart");
+			log("chart divs count:" + divs.length);
+			if (divs.length == 0) {
+				return;
+			}
+			if (divs[0].clientWidth == 0) {
+				return;
+			}
+			for (var div of divs) {
+				var c = echarts.getInstanceByDom(div);
+				if (c) {
+					c.resize('auto', 'auto');
+				}
+			}
+		}
+		window.onresize = function () {
+			log("window onresize");
+			chart_resize();
+		}
+		window.onload = null;
+		page_init();
+	</script>
+	<script src="https://cdn.jsdelivr.net/npm/echarts@4.8.0/dist/echarts.common.min.js" defer async></script>
+	<script src="irext.js"></script>
+</body>
+
+</html>

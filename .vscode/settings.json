@@ -2,6 +2,11 @@
     "files.associations": {
         "stdio.h": "c",
         "esp_wifi.h": "c",
-        "*.inc": "c"
+        "*.inc": "c",
+        "wifimanager.h": "c",
+        "esp_http_server.h": "c",
+        "freertos.h": "c",
+        "sdkconfig.h": "c",
+        "http_parser.h": "c"
     }
 }

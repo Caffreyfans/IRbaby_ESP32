@@ -1,7 +1,7 @@
 /*
  * @Author: Caffreyfans
  * @Date: 2021-06-19 15:57:08
- * @LastEditTime: 2021-06-27 20:57:27
+ * @LastEditTime: 2021-06-29 23:45:24
  * @Description:
  */
 #include "web.h"
@@ -23,8 +23,8 @@ extern const char config_json[] asm("_binary_config_json_start");
 extern const char irext_js[] asm("_binary_irext_js_start");
 
 static esp_err_t index_handler(httpd_req_t *req) {
-  const int query_buffer_size = 128;
-  const int value_buffer_size = 128;
+  const int query_buffer_size = 512;
+  const int value_buffer_size = 512;
   char query_str[value_buffer_size];
   char value[value_buffer_size];
   esp_err_t ret = ESP_FAIL;
@@ -82,12 +82,6 @@ static esp_err_t wificonfig_handler(httpd_req_t *req) {
   int cur_len = 0;
   int received = 0;
   char *buf = (char *)req->user_ctx;
-  if (total_len >= 1024) {
-    /* Respond with 500 Internal Server Error */
-    httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR,
-                        "content too long");
-    return ESP_FAIL;
-  }
   while (cur_len < total_len) {
     received = httpd_req_recv(req, buf + cur_len, total_len);
     if (received <= 0) {
@@ -160,6 +154,11 @@ void start_webserver(void) {
                             .handler = root_handler,
                             .user_ctx = NULL};
 
+  const httpd_uri_t generate_204 = {.uri = "/generate_204",
+                                    .method = HTTP_GET,
+                                    .handler = root_handler,
+                                    .user_ctx = NULL};
+
   const httpd_uri_t index_get = {.uri = "/index",
                                  .method = HTTP_GET,
                                  .handler = index_handler,
@@ -177,6 +176,7 @@ void start_webserver(void) {
     httpd_register_uri_handler(server, &wificonfig_post);
     httpd_register_uri_handler(server, &wificonfig_get);
     httpd_register_uri_handler(server, &root);
+    httpd_register_uri_handler(server, &generate_204);
     httpd_register_uri_handler(server, &index_get);
     httpd_register_uri_handler(server, &irext);
   }
