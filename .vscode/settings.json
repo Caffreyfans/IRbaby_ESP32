@@ -7,6 +7,7 @@
         "esp_http_server.h": "c",
         "freertos.h": "c",
         "sdkconfig.h": "c",
-        "http_parser.h": "c"
+        "http_parser.h": "c",
+        "irext_api.h": "c"
     }
 }
