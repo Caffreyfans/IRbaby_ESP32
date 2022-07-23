@@ -6,7 +6,6 @@
  */
 #ifndef HANDLER_H_
 #define HANDLER_H_
-#include "cJSON.h"
 #include "esp_err.h"
 
 char *connect_wifi_handle(const char *ssid, const char *pass);

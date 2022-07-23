@@ -17,6 +17,7 @@
 #include "sys/param.h"
 
 static const char *TAG = "WEB";
+
 extern const char wificonfig_html[] asm("_binary_wificonfig_html_start");
 extern const char root_html[] asm("_binary_root_html_start");
 extern const char config_json[] asm("_binary_config_json_start");
@@ -78,10 +79,12 @@ static esp_err_t wificonfig_handler(httpd_req_t *req) {
     httpd_resp_sendstr(req, (const char *)req->user_ctx);
     return ESP_OK;
   }
+
+  // connect to wifi
   int total_len = req->content_len;
   int cur_len = 0;
   int received = 0;
-  char *buf = (char *)req->user_ctx;
+  char buf[256];
   while (cur_len < total_len) {
     received = httpd_req_recv(req, buf + cur_len, total_len);
     if (received <= 0) {
@@ -93,6 +96,7 @@ static esp_err_t wificonfig_handler(httpd_req_t *req) {
     cur_len += received;
   }
   buf[total_len] = '\0';
+
   cJSON *root = form_parse(buf);
   if (root == NULL) return ESP_FAIL;
   cJSON *item = NULL;
@@ -129,7 +133,7 @@ static esp_err_t irext_handler(httpd_req_t *req) {
 }
 
 static httpd_handle_t server = NULL;
-static char *g_user_ctx = NULL;
+
 void start_webserver(void) {
   ESP_LOGI(TAG, "try to start web server");
   if (server != NULL) {
@@ -138,11 +142,10 @@ void start_webserver(void) {
   ESP_LOGI(TAG, "web server started");
   httpd_config_t config = HTTPD_DEFAULT_CONFIG();
   config.lru_purge_enable = true;
-  g_user_ctx = (char *)calloc(1024, sizeof(char));
   const httpd_uri_t wificonfig_post = {.uri = "/wificonfig",
                                        .method = HTTP_POST,
                                        .handler = wificonfig_handler,
-                                       .user_ctx = g_user_ctx};
+                                       .user_ctx = NULL};
 
   const httpd_uri_t wificonfig_get = {.uri = "/wificonfig",
                                       .method = HTTP_GET,
@@ -164,12 +167,13 @@ void start_webserver(void) {
                                  .handler = index_handler,
                                  .user_ctx = (void *)config_json};
 
-  const httpd_uri_t irext = {.uri = "/irext.js",
-                             .method = HTTP_GET,
-                             .handler = irext_handler,
-                             .user_ctx = (void *)irext_js};
+  // const httpd_uri_t irext = {.uri = "/irext.js",
+  //                            .method = HTTP_GET,
+  //                            .handler = irext_handler,
+  //                            .user_ctx = (void *)irext_js};
 
   ESP_LOGI(TAG, "Starting server on port: '%d'", config.server_port);
+
   if (httpd_start(&server, &config) == ESP_OK) {
     // Set URL handlers
     ESP_LOGI(TAG, "Registering URL handlers");
@@ -178,7 +182,6 @@ void start_webserver(void) {
     httpd_register_uri_handler(server, &root);
     httpd_register_uri_handler(server, &generate_204);
     httpd_register_uri_handler(server, &index_get);
-    httpd_register_uri_handler(server, &irext);
   }
 }
 
@@ -186,10 +189,6 @@ void shutdown_webserver(void) {
   if (server != NULL) {
     ESP_LOGI(TAG, "shutdown web server");
     httpd_stop(server);
-    if (g_user_ctx != NULL) {
-      free(g_user_ctx);
-      g_user_ctx = NULL;
-    }
     server = NULL;
   }
 }

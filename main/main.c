@@ -14,6 +14,7 @@
 */
 #include <string.h>
 
+#include "cJSON.h"
 #include "esp_event.h"
 #include "esp_http_server.h"
 #include "esp_log.h"
@@ -21,19 +22,36 @@
 #include "esp_system.h"
 #include "esp_wifi.h"
 #include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
 #include "irbaby.h"
-#include "lwip/dns.h"
-#include "lwip/err.h"
-#include "lwip/netdb.h"
-#include "lwip/sockets.h"
-#include "lwip/sys.h"
+#include "irext_api.h"
 #include "nvs_flash.h"
-#include "protocol_examples_common.h"
-#include "web.h"
 #include "wifimanager.h"
-#include "handler.h"
 static const char *TAG = "IRbaby";
+
+static void irbaby_start() {
+  wifi_init();
+  cJSON *token_obj = irext_login("cdf33048c9dbef2962b0f915bc7e420c",
+                                 "f00f57af376c66ca1355cfe109400dd2", "2");
+  char *token_str = cJSON_GetObjectItem(token_obj, "token")->valuestring;
+  int id_num = cJSON_GetObjectItem(token_obj, "id")->valueint;
+  cJSON *categories_obj = irext_list_categories(id_num, token_str);
+  cJSON *brands_obj = irext_list_brands(1, id_num, token_str);
+  cJSON *indexes_obj = irext_list_indexes(1, 1, id_num, token_str);
+
+  char *str = cJSON_PrintUnformatted(categories_obj);
+  printf("%s\n", str);
+  free(str);
+  str = cJSON_PrintUnformatted(brands_obj);
+  printf("%s\n", str);
+  free(str);
+  str = cJSON_PrintUnformatted(indexes_obj);
+  printf("%s\n", str);
+  free(str);
+
+  cJSON_Delete(categories_obj);
+  cJSON_Delete(token_obj);
+  cJSON_Delete(indexes_obj);
+}
 
 void app_main(void) {
   ESP_ERROR_CHECK(nvs_flash_init());
@@ -47,5 +65,5 @@ void app_main(void) {
   // Use settings defined above to initialize and mount SPIFFS filesystem.
   // Note: esp_vfs_spiffs_register is an all-in-one convenience function.
   esp_vfs_spiffs_register(&conf);
-  wifi_init();
+  irbaby_start();
 }

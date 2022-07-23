@@ -13,7 +13,7 @@
 
 void wifi_init();
 bool wifi_start_ap();
-bool wifi_start_station(const char *ssid, const char *pass);
+bool wifi_connect_to_ap(const char *ssid, const char *password);
 uint8_t wifi_scan_ap(wifi_ap_record_t *ap_infos, const uint8_t size);
 
 extern esp_netif_t *g_station_netif;

@@ -47,28 +47,28 @@ exit:
   return NULL;
 }
 
-cJSON *get_parse(char *data) {
-  if (data == NULL) return NULL;
-  int data_len = strlen(data);
-  char *start = data;
-  char *end = NULL;
-  cJSON *root = cJSON_CreateObject();
-  if (root == NULL) return NULL;
-  char key[52];
-  char value[52];
-  while ((end = strchr(start, '=')) != NULL) {
-    int len = end - start;
-    memcpy(key, start, len);
-    char *next = strchr(index, '&');
-    if (next != NULL) {
-      end = next - 1;
-    } else {
-      end = data + data_len;
-    }
-    len = end - start;
-    memcpy(value, start, len);
-    cJSON_AddStringToObject(root, key, value);
-    start = end;
-  }
-  return root;
-}
+// cJSON *get_parse(char *data) {
+//   if (data == NULL) return NULL;
+//   int data_len = strlen(data);
+//   char *start = data;
+//   char *end = NULL;
+//   cJSON *root = cJSON_CreateObject();
+//   if (root == NULL) return NULL;
+//   char key[52];
+//   char value[52];
+//   while ((end = strchr(start, '=')) != NULL) {
+//     int len = end - start;
+//     memcpy(key, start, len);
+//     char *next = strchr(index, '&');
+//     if (next != NULL) {
+//       end = next - 1;
+//     } else {
+//       end = data + data_len;
+//     }
+//     len = end - start;
+//     memcpy(value, start, len);
+//     cJSON_AddStringToObject(root, key, value);
+//     start = end;
+//   }
+//   return root;
+// }

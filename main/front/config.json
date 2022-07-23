@@ -8,6 +8,24 @@
             "contents": [
                 {
                     "render": "cells",
+                    "label": "空调选择 AC choose",
+                    "cells": [
+                        {
+                            "render": "select",
+                            "label": "品牌 Brand",
+                            "key": "brand",
+                            "options": []
+                        },
+                        {
+                            "render": "select",
+                            "label": "编码 coding",
+                            "key": "coding",
+                            "options": []
+                        }
+                    ]
+                },
+                {
+                    "render": "cells",
                     "label": "空调基础控制 AC Main Control",
                     "cells": [
                         {

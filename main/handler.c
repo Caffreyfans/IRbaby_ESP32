@@ -6,6 +6,7 @@
  */
 #include "handler.h"
 
+#include "cJSON.h"
 #include "esp_log.h"
 #include "esp_netif.h"
 #include "esp_spi_flash.h"
@@ -19,7 +20,7 @@ char *connect_wifi_handle(const char *ssid, const char *pass) {
   char *response = NULL;
   cJSON *root = cJSON_CreateObject();
   if (root == NULL) goto exit;
-  if (wifi_start_station(ssid, pass) == true) {
+  if (wifi_connect_to_ap(ssid, pass) == true) {
     cJSON_AddStringToObject(root, "code", "0");
     cJSON_AddStringToObject(root, "msg", "SSID and PASSWORD are saved.");
 
@@ -165,8 +166,7 @@ char *get_gpio_handle() {
   return response;
 }
 
-char *get_more_handle()
-{
+char *get_more_handle() {
   char *response = NULL;
   cJSON *root = cJSON_CreateObject();
   if (root == NULL) return NULL;
