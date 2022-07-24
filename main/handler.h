@@ -9,6 +9,7 @@
 #include "esp_err.h"
 
 char *connect_wifi_handle(const char *ssid, const char *pass);
+char *web_get_index_handle();
 char *scan_wifi_handle();
 char *get_info_handle();
 char *get_ir_handle();

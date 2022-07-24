@@ -14,12 +14,1005 @@
                             "render": "select",
                             "label": "品牌 Brand",
                             "key": "brand",
-                            "options": []
+                            "options": [
+                                {
+                                    "value": 4,
+                                    "label": "格力"
+                                },
+                                {
+                                    "value": 9,
+                                    "label": "美的"
+                                },
+                                {
+                                    "value": 5,
+                                    "label": "海尔"
+                                },
+                                {
+                                    "value": 6,
+                                    "label": "海信"
+                                },
+                                {
+                                    "value": 11,
+                                    "label": "志高"
+                                },
+                                {
+                                    "value": 84,
+                                    "label": "大金"
+                                },
+                                {
+                                    "value": 1,
+                                    "label": "奥克斯"
+                                },
+                                {
+                                    "value": 85,
+                                    "label": "松下"
+                                },
+                                {
+                                    "value": 86,
+                                    "label": "格兰仕"
+                                },
+                                {
+                                    "value": 10,
+                                    "label": "TCL"
+                                },
+                                {
+                                    "value": 880,
+                                    "label": "三星"
+                                },
+                                {
+                                    "value": 1911,
+                                    "label": "样例"
+                                },
+                                {
+                                    "value": 12,
+                                    "label": "澳柯玛"
+                                },
+                                {
+                                    "value": 8,
+                                    "label": "科龙"
+                                },
+                                {
+                                    "value": 7,
+                                    "label": "康佳"
+                                },
+                                {
+                                    "value": 3,
+                                    "label": "春兰"
+                                },
+                                {
+                                    "value": 881,
+                                    "label": "东芝"
+                                },
+                                {
+                                    "value": 882,
+                                    "label": "LG 乐金"
+                                },
+                                {
+                                    "value": 883,
+                                    "label": "飞利浦"
+                                },
+                                {
+                                    "value": 884,
+                                    "label": "夏普"
+                                },
+                                {
+                                    "value": 888,
+                                    "label": "熊猫"
+                                },
+                                {
+                                    "value": 887,
+                                    "label": "伊莱克斯"
+                                },
+                                {
+                                    "value": 12,
+                                    "label": "澳柯玛"
+                                },
+                                {
+                                    "value": 885,
+                                    "label": "三菱"
+                                },
+                                {
+                                    "value": 884,
+                                    "label": "夏普"
+                                },
+                                {
+                                    "value": 883,
+                                    "label": "飞利浦"
+                                },
+                                {
+                                    "value": 882,
+                                    "label": "LG 乐金"
+                                },
+                                {
+                                    "value": 881,
+                                    "label": "东芝"
+                                },
+                                {
+                                    "value": 3,
+                                    "label": "春兰"
+                                },
+                                {
+                                    "value": 7,
+                                    "label": "康佳"
+                                },
+                                {
+                                    "value": 887,
+                                    "label": "伊莱克斯"
+                                },
+                                {
+                                    "value": 886,
+                                    "label": "双鹿"
+                                },
+                                {
+                                    "value": 884,
+                                    "label": "夏普"
+                                },
+                                {
+                                    "value": 883,
+                                    "label": "飞利浦"
+                                },
+                                {
+                                    "value": 882,
+                                    "label": "LG 乐金"
+                                },
+                                {
+                                    "value": 881,
+                                    "label": "东芝"
+                                },
+                                {
+                                    "value": 12,
+                                    "label": "澳柯玛"
+                                },
+                                {
+                                    "value": 8,
+                                    "label": "科龙"
+                                },
+                                {
+                                    "value": 7,
+                                    "label": "康佳"
+                                },
+                                {
+                                    "value": 3,
+                                    "label": "春兰"
+                                },
+                                {
+                                    "value": 884,
+                                    "label": "夏普"
+                                },
+                                {
+                                    "value": 896,
+                                    "label": "奥力"
+                                },
+                                {
+                                    "value": 886,
+                                    "label": "双鹿"
+                                },
+                                {
+                                    "value": 887,
+                                    "label": "伊莱克斯"
+                                },
+                                {
+                                    "value": 888,
+                                    "label": "熊猫"
+                                },
+                                {
+                                    "value": 889,
+                                    "label": "乐华"
+                                },
+                                {
+                                    "value": 891,
+                                    "label": "扬子"
+                                },
+                                {
+                                    "value": 892,
+                                    "label": "惠而浦"
+                                },
+                                {
+                                    "value": 893,
+                                    "label": "三洋"
+                                },
+                                {
+                                    "value": 894,
+                                    "label": "长岭"
+                                },
+                                {
+                                    "value": 889,
+                                    "label": "乐华"
+                                },
+                                {
+                                    "value": 890,
+                                    "label": "日立"
+                                },
+                                {
+                                    "value": 891,
+                                    "label": "扬子"
+                                },
+                                {
+                                    "value": 892,
+                                    "label": "惠而浦"
+                                },
+                                {
+                                    "value": 893,
+                                    "label": "三洋"
+                                },
+                                {
+                                    "value": 894,
+                                    "label": "长岭"
+                                },
+                                {
+                                    "value": 896,
+                                    "label": "奥力"
+                                },
+                                {
+                                    "value": 897,
+                                    "label": "澳科"
+                                },
+                                {
+                                    "value": 898,
+                                    "label": "白雪"
+                                },
+                                {
+                                    "value": 899,
+                                    "label": "北京京电"
+                                },
+                                {
+                                    "value": 894,
+                                    "label": "长岭"
+                                },
+                                {
+                                    "value": 895,
+                                    "label": "开利"
+                                },
+                                {
+                                    "value": 896,
+                                    "label": "奥力"
+                                },
+                                {
+                                    "value": 897,
+                                    "label": "澳科"
+                                },
+                                {
+                                    "value": 898,
+                                    "label": "白雪"
+                                },
+                                {
+                                    "value": 899,
+                                    "label": "北京京电"
+                                },
+                                {
+                                    "value": 901,
+                                    "label": "大宇"
+                                },
+                                {
+                                    "value": 902,
+                                    "label": "飞歌"
+                                },
+                                {
+                                    "value": 903,
+                                    "label": "飞鹿"
+                                },
+                                {
+                                    "value": 904,
+                                    "label": "富士通"
+                                },
+                                {
+                                    "value": 904,
+                                    "label": "富士通"
+                                },
+                                {
+                                    "value": 903,
+                                    "label": "飞鹿"
+                                },
+                                {
+                                    "value": 902,
+                                    "label": "飞歌"
+                                },
+                                {
+                                    "value": 911,
+                                    "label": "博世"
+                                },
+                                {
+                                    "value": 900,
+                                    "label": "波尔卡"
+                                },
+                                {
+                                    "value": 899,
+                                    "label": "北京京电"
+                                },
+                                {
+                                    "value": 898,
+                                    "label": "白雪"
+                                },
+                                {
+                                    "value": 897,
+                                    "label": "澳科"
+                                },
+                                {
+                                    "value": 896,
+                                    "label": "奥力"
+                                },
+                                {
+                                    "value": 895,
+                                    "label": "开利"
+                                },
+                                {
+                                    "value": 906,
+                                    "label": "彩星"
+                                },
+                                {
+                                    "value": 916,
+                                    "label": "日电"
+                                },
+                                {
+                                    "value": 904,
+                                    "label": "富士通"
+                                },
+                                {
+                                    "value": 903,
+                                    "label": "飞鹿"
+                                },
+                                {
+                                    "value": 902,
+                                    "label": "飞歌"
+                                },
+                                {
+                                    "value": 901,
+                                    "label": "大宇"
+                                },
+                                {
+                                    "value": 900,
+                                    "label": "波尔卡"
+                                },
+                                {
+                                    "value": 899,
+                                    "label": "北京京电"
+                                },
+                                {
+                                    "value": 898,
+                                    "label": "白雪"
+                                },
+                                {
+                                    "value": 897,
+                                    "label": "澳科"
+                                },
+                                {
+                                    "value": 954,
+                                    "label": "奇迪"
+                                },
+                                {
+                                    "value": 955,
+                                    "label": "蓝波"
+                                },
+                                {
+                                    "value": 956,
+                                    "label": "国际"
+                                },
+                                {
+                                    "value": 957,
+                                    "label": "日彩"
+                                },
+                                {
+                                    "value": 958,
+                                    "label": "日江"
+                                },
+                                {
+                                    "value": 959,
+                                    "label": "三钻"
+                                },
+                                {
+                                    "value": 960,
+                                    "label": "上菱"
+                                },
+                                {
+                                    "value": 961,
+                                    "label": "绅宝"
+                                },
+                                {
+                                    "value": 962,
+                                    "label": "胜风"
+                                },
+                                {
+                                    "value": 963,
+                                    "label": "帅康"
+                                },
+                                {
+                                    "value": 964,
+                                    "label": "双菱"
+                                },
+                                {
+                                    "value": 965,
+                                    "label": "天津"
+                                },
+                                {
+                                    "value": 966,
+                                    "label": "天元"
+                                },
+                                {
+                                    "value": 967,
+                                    "label": "同益"
+                                },
+                                {
+                                    "value": 968,
+                                    "label": "万宝"
+                                },
+                                {
+                                    "value": 969,
+                                    "label": "威特利"
+                                },
+                                {
+                                    "value": 970,
+                                    "label": "雾峰"
+                                },
+                                {
+                                    "value": 971,
+                                    "label": "小鸭"
+                                },
+                                {
+                                    "value": 972,
+                                    "label": "夏洋"
+                                },
+                                {
+                                    "value": 973,
+                                    "label": "西冷"
+                                },
+                                {
+                                    "value": 974,
+                                    "label": "新飞"
+                                },
+                                {
+                                    "value": 975,
+                                    "label": "耀马"
+                                },
+                                {
+                                    "value": 976,
+                                    "label": "约克"
+                                },
+                                {
+                                    "value": 977,
+                                    "label": "月兔"
+                                },
+                                {
+                                    "value": 978,
+                                    "label": "金达"
+                                },
+                                {
+                                    "value": 979,
+                                    "label": "中意"
+                                },
+                                {
+                                    "value": 980,
+                                    "label": "佐丹"
+                                },
+                                {
+                                    "value": 981,
+                                    "label": "长谷"
+                                },
+                                {
+                                    "value": 982,
+                                    "label": "东洋汇丰"
+                                },
+                                {
+                                    "value": 983,
+                                    "label": "惠康"
+                                },
+                                {
+                                    "value": 984,
+                                    "label": "山星"
+                                },
+                                {
+                                    "value": 985,
+                                    "label": "星河"
+                                },
+                                {
+                                    "value": 986,
+                                    "label": "利凯尔"
+                                },
+                                {
+                                    "value": 987,
+                                    "label": "帅宝"
+                                },
+                                {
+                                    "value": 988,
+                                    "label": "凉宇"
+                                },
+                                {
+                                    "value": 989,
+                                    "label": "Akira"
+                                },
+                                {
+                                    "value": 990,
+                                    "label": "Nikko"
+                                },
+                                {
+                                    "value": 991,
+                                    "label": "Loben-Sebo"
+                                },
+                                {
+                                    "value": 992,
+                                    "label": "Klimatair"
+                                },
+                                {
+                                    "value": 993,
+                                    "label": "新科"
+                                },
+                                {
+                                    "value": 994,
+                                    "label": "Kris"
+                                },
+                                {
+                                    "value": 995,
+                                    "label": "森宝"
+                                },
+                                {
+                                    "value": 996,
+                                    "label": "华凌"
+                                },
+                                {
+                                    "value": 997,
+                                    "label": "Uni-Atr"
+                                },
+                                {
+                                    "value": 998,
+                                    "label": "Saijo-Denki"
+                                },
+                                {
+                                    "value": 999,
+                                    "label": "Alpin"
+                                },
+                                {
+                                    "value": 1000,
+                                    "label": "Amcor"
+                                },
+                                {
+                                    "value": 1001,
+                                    "label": "Belcor-Classic"
+                                },
+                                {
+                                    "value": 1002,
+                                    "label": "宜科"
+                                },
+                                {
+                                    "value": 1003,
+                                    "label": "以莱特"
+                                },
+                                {
+                                    "value": 1004,
+                                    "label": "Ojun"
+                                },
+                                {
+                                    "value": 1005,
+                                    "label": "Opal"
+                                },
+                                {
+                                    "value": 1006,
+                                    "label": "Starway"
+                                },
+                                {
+                                    "value": 1007,
+                                    "label": "Tadiair"
+                                },
+                                {
+                                    "value": 1008,
+                                    "label": "格威尔"
+                                },
+                                {
+                                    "value": 1009,
+                                    "label": "威力"
+                                },
+                                {
+                                    "value": 1010,
+                                    "label": "爱德龙"
+                                },
+                                {
+                                    "value": 1011,
+                                    "label": "特灵"
+                                },
+                                {
+                                    "value": 1012,
+                                    "label": "Amico"
+                                },
+                                {
+                                    "value": 1013,
+                                    "label": "索伊"
+                                },
+                                {
+                                    "value": 1014,
+                                    "label": "小天鹅"
+                                },
+                                {
+                                    "value": 1015,
+                                    "label": "申花"
+                                },
+                                {
+                                    "value": 1046,
+                                    "label": "现代"
+                                },
+                                {
+                                    "value": 1047,
+                                    "label": "迪泰尔"
+                                },
+                                {
+                                    "value": 1048,
+                                    "label": "美博"
+                                },
+                                {
+                                    "value": 1049,
+                                    "label": "康拜恩"
+                                },
+                                {
+                                    "value": 1050,
+                                    "label": "万家乐"
+                                },
+                                {
+                                    "value": 1051,
+                                    "label": "三菱重工"
+                                },
+                                {
+                                    "value": 1052,
+                                    "label": "三菱电机"
+                                },
+                                {
+                                    "value": 1124,
+                                    "label": "优派"
+                                },
+                                {
+                                    "value": 1469,
+                                    "label": "麦克维尔"
+                                },
+                                {
+                                    "value": 1470,
+                                    "label": "美菱"
+                                },
+                                {
+                                    "value": 1471,
+                                    "label": "康利"
+                                },
+                                {
+                                    "value": 1472,
+                                    "label": "Blue Star"
+                                },
+                                {
+                                    "value": 1473,
+                                    "label": "Voltas"
+                                },
+                                {
+                                    "value": 1474,
+                                    "label": "Jiangnan"
+                                },
+                                {
+                                    "value": 1475,
+                                    "label": "Gibson"
+                                },
+                                {
+                                    "value": 1476,
+                                    "label": "福奈"
+                                },
+                                {
+                                    "value": 1477,
+                                    "label": "FUNIKI"
+                                },
+                                {
+                                    "value": 1478,
+                                    "label": "Videocon"
+                                },
+                                {
+                                    "value": 1504,
+                                    "label": "金三洋"
+                                },
+                                {
+                                    "value": 1505,
+                                    "label": "吉普生"
+                                },
+                                {
+                                    "value": 1749,
+                                    "label": "歌林"
+                                },
+                                {
+                                    "value": 1750,
+                                    "label": "声宝"
+                                },
+                                {
+                                    "value": 1753,
+                                    "label": "创维"
+                                },
+                                {
+                                    "value": 1754,
+                                    "label": "阿玛纳"
+                                },
+                                {
+                                    "value": 1755,
+                                    "label": "北极星"
+                                },
+                                {
+                                    "value": 1756,
+                                    "label": "Elba"
+                                },
+                                {
+                                    "value": 1757,
+                                    "label": "Croma"
+                                },
+                                {
+                                    "value": 1758,
+                                    "label": "大岛"
+                                },
+                                {
+                                    "value": 1759,
+                                    "label": "Central Air"
+                                },
+                                {
+                                    "value": 1760,
+                                    "label": "Clima Smart"
+                                },
+                                {
+                                    "value": 1761,
+                                    "label": "浦路威"
+                                },
+                                {
+                                    "value": 1762,
+                                    "label": "Intertherm"
+                                },
+                                {
+                                    "value": 1763,
+                                    "label": "Kiowa"
+                                },
+                                {
+                                    "value": 1764,
+                                    "label": "Homsys"
+                                },
+                                {
+                                    "value": 1765,
+                                    "label": "幻想曲电器"
+                                },
+                                {
+                                    "value": 1766,
+                                    "label": "Hesstar"
+                                },
+                                {
+                                    "value": 1767,
+                                    "label": "Fujiaire"
+                                },
+                                {
+                                    "value": 1768,
+                                    "label": "汉普顿"
+                                },
+                                {
+                                    "value": 1769,
+                                    "label": "美歌"
+                                },
+                                {
+                                    "value": 1770,
+                                    "label": "MDV"
+                                },
+                                {
+                                    "value": 1771,
+                                    "label": "乐信"
+                                },
+                                {
+                                    "value": 1772,
+                                    "label": "乐士"
+                                },
+                                {
+                                    "value": 1773,
+                                    "label": "Komeco"
+                                },
+                                {
+                                    "value": 1774,
+                                    "label": "KelVinator"
+                                },
+                                {
+                                    "value": 1775,
+                                    "label": "将军"
+                                },
+                                {
+                                    "value": 1776,
+                                    "label": "Niso"
+                                },
+                                {
+                                    "value": 1777,
+                                    "label": "Yamatsu"
+                                },
+                                {
+                                    "value": 1778,
+                                    "label": "永安"
+                                },
+                                {
+                                    "value": 1779,
+                                    "label": "Topaire"
+                                },
+                                {
+                                    "value": 1780,
+                                    "label": "Hommer"
+                                },
+                                {
+                                    "value": 1781,
+                                    "label": "扎米尔"
+                                },
+                                {
+                                    "value": 1782,
+                                    "label": "Simplicity"
+                                },
+                                {
+                                    "value": 1783,
+                                    "label": "Payne"
+                                },
+                                {
+                                    "value": 1784,
+                                    "label": "Sumikura"
+                                },
+                                {
+                                    "value": 1785,
+                                    "label": "Springer"
+                                },
+                                {
+                                    "value": 1786,
+                                    "label": "Saunier duval"
+                                },
+                                {
+                                    "value": 1787,
+                                    "label": "雪花"
+                                },
+                                {
+                                    "value": 1788,
+                                    "label": "Whisen"
+                                },
+                                {
+                                    "value": 1789,
+                                    "label": "Lvt"
+                                },
+                                {
+                                    "value": 1790,
+                                    "label": "IGC"
+                                },
+                                {
+                                    "value": 1791,
+                                    "label": "万士益"
+                                },
+                                {
+                                    "value": 1792,
+                                    "label": "阳光"
+                                },
+                                {
+                                    "value": 1793,
+                                    "label": "三垦"
+                                },
+                                {
+                                    "value": 1794,
+                                    "label": "Godrej"
+                                },
+                                {
+                                    "value": 1795,
+                                    "label": "世纪"
+                                },
+                                {
+                                    "value": 1796,
+                                    "label": "Sears"
+                                },
+                                {
+                                    "value": 1797,
+                                    "label": "丰臣"
+                                },
+                                {
+                                    "value": 1798,
+                                    "label": "阪神"
+                                },
+                                {
+                                    "value": 1799,
+                                    "label": "Chofu"
+                                },
+                                {
+                                    "value": 1800,
+                                    "label": "丹比"
+                                },
+                                {
+                                    "value": 1801,
+                                    "label": "Singer"
+                                },
+                                {
+                                    "value": 1802,
+                                    "label": "舒适艾尔"
+                                },
+                                {
+                                    "value": 1803,
+                                    "label": "Armcor"
+                                },
+                                {
+                                    "value": 1804,
+                                    "label": "熙尔仕楷模"
+                                },
+                                {
+                                    "value": 1805,
+                                    "label": "Bosko"
+                                },
+                                {
+                                    "value": 1806,
+                                    "label": "塔迪兰"
+                                },
+                                {
+                                    "value": 1807,
+                                    "label": "Doctor"
+                                },
+                                {
+                                    "value": 1808,
+                                    "label": "高士达"
+                                },
+                                {
+                                    "value": 1809,
+                                    "label": "Uni-air"
+                                },
+                                {
+                                    "value": 1810,
+                                    "label": "米勒"
+                                },
+                                {
+                                    "value": 1811,
+                                    "label": "Oak"
+                                },
+                                {
+                                    "value": 1812,
+                                    "label": "珍宝"
+                                },
+                                {
+                                    "value": 1813,
+                                    "label": "爱家乐"
+                                },
+                                {
+                                    "value": 1814,
+                                    "label": "拍得丽"
+                                },
+                                {
+                                    "value": 1815,
+                                    "label": "Sampo"
+                                },
+                                {
+                                    "value": 1816,
+                                    "label": "维友康"
+                                },
+                                {
+                                    "value": 1864,
+                                    "label": "禾联"
+                                },
+                                {
+                                    "value": 1871,
+                                    "label": "华菱"
+                                },
+                                {
+                                    "value": 1876,
+                                    "label": "新禾"
+                                },
+                                {
+                                    "value": 1879,
+                                    "label": "国菱"
+                                },
+                                {
+                                    "value": 1880,
+                                    "label": "莎普罗"
+                                },
+                                {
+                                    "value": 1881,
+                                    "label": "冰点"
+                                },
+                                {
+                                    "value": 1886,
+                                    "label": "艾普顿"
+                                },
+                                {
+                                    "value": 1887,
+                                    "label": "惠威"
+                                },
+                                {
+                                    "value": 1895,
+                                    "label": "派瑞"
+                                },
+                                {
+                                    "value": 1903,
+                                    "label": "太一"
+                                }
+                            ]
                         },
                         {
                             "render": "select",
-                            "label": "编码 coding",
-                            "key": "coding",
+                            "label": "协议 protocol",
+                            "key": "protocol",
                             "options": []
                         }
                     ]
@@ -40,6 +1033,10 @@
                             "key": "mode",
                             "path": "",
                             "options": [
+                                {
+                                    "label": "Auto",
+                                    "value": "0"
+                                },
                                 {
                                     "label": "Cool",
                                     "value": "1"
@@ -120,8 +1117,24 @@
                         },
                         {
                             "render": "select",
+                            "label": "扫风 Fan",
+                            "key": "fan",
+                            "path": "",
+                            "options": [
+                                {
+                                    "label": "On",
+                                    "value": 0
+                                },
+                                {
+                                    "label": "Off",
+                                    "value": 1
+                                }
+                            ]
+                        },
+                        {
+                            "render": "select",
                             "label": "风速 Fan Speed",
-                            "key": "fanspeed",
+                            "key": "fan_speed",
                             "path": "",
                             "options": [
                                 {
@@ -151,68 +1164,24 @@
                             ]
                         },
                         {
-                            "render": "switch",
-                            "label": "上下扫风 Swing(V)",
-                            "key": "swingv",
-                            "path": ""
-                        },
-                        {
-                            "render": "switch",
-                            "label": "左右扫风 Swing(H)",
-                            "key": "swingh",
-                            "path": ""
-                        },
-                        {
-                            "render": "switch",
-                            "label": "灯光 Light",
-                            "key": "light",
-                            "path": ""
-                        },
-                        {
-                            "render": "url",
-                            "label": "保存为上电状态 Save as Power-on State",
-                            "key": "save_ac_state"
-                        },
-                        {
-                            "render": "url",
-                            "label": "发射红外 Send IR",
-                            "key": "send_ir"
-                        }
-                    ]
-                },
-                {
-                    "render": "cells",
-                    "label": "空调更多控制 AC Sub Control",
-                    "cells": [
-                        {
-                            "render": "switch",
-                            "label": "静音 Quiet",
-                            "key": "quiet"
-                        },
-                        {
-                            "render": "switch",
-                            "label": "强劲 Turbo",
-                            "key": "turbo"
-                        },
-                        {
-                            "render": "switch",
-                            "label": "经济 Econo",
-                            "key": "econo"
-                        },
-                        {
-                            "render": "switch",
-                            "label": "过滤 Filter",
-                            "key": "filter"
-                        },
-                        {
-                            "render": "switch",
-                            "label": "清洁 Clean",
-                            "key": "clean"
-                        },
-                        {
-                            "render": "switch",
-                            "label": "蜂鸣 Beep",
-                            "key": "beep"
+                            "render": "select",
+                            "label": "风向 Fan Direction",
+                            "key": "fan_direction",
+                            "path": "",
+                            "options": [
+                                {
+                                    "label": "Top",
+                                    "value": 0
+                                },
+                                {
+                                    "label": "Middle",
+                                    "value": 1
+                                },
+                                {
+                                    "label": "Bottom",
+                                    "value": 2
+                                }
+                            ]
                         }
                     ]
                 },

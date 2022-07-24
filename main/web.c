@@ -13,10 +13,11 @@
 #include "form_parser.h"
 #include "handler.h"
 #include "nvs_flash.h"
+#include "obj.h"
 #include "string.h"
 #include "sys/param.h"
 
-static const char *TAG = "WEB";
+static const char *TAG = "web.c";
 
 extern const char wificonfig_html[] asm("_binary_wificonfig_html_start");
 extern const char root_html[] asm("_binary_root_html_start");
@@ -24,20 +25,15 @@ extern const char config_json[] asm("_binary_config_json_start");
 extern const char irext_js[] asm("_binary_irext_js_start");
 
 static esp_err_t index_handler(httpd_req_t *req) {
-  const int query_buffer_size = 512;
-  const int value_buffer_size = 512;
-  char query_str[value_buffer_size];
-  char value[value_buffer_size];
-  esp_err_t ret = ESP_FAIL;
-  httpd_req_get_url_query_str(req, query_str, query_buffer_size);
-  ret = httpd_query_key_value(query_str, "page", value, value_buffer_size);
-  if (ret == ESP_OK) {
-    httpd_resp_sendstr(req, (const char *)req->user_ctx);
-    return ESP_OK;
-  }
   char *response = NULL;
-  ret = httpd_query_key_value(query_str, "sync", value, value_buffer_size);
-  if (ret == ESP_OK) {
+#define BUFFER_SIZE 512
+  char query_str[BUFFER_SIZE];
+  char value[BUFFER_SIZE];
+  httpd_req_get_url_query_str(req, query_str, BUFFER_SIZE);
+  if (httpd_query_key_value(query_str, "page", value, BUFFER_SIZE) == ESP_OK) {
+    response = web_get_index_handle();
+  } else if (httpd_query_key_value(query_str, "sync", value, BUFFER_SIZE) ==
+             ESP_OK) {
     int tab = atoi(value);
     switch (tab) {
       case 0:
@@ -55,18 +51,54 @@ static esp_err_t index_handler(httpd_req_t *req) {
       default:
         break;
     }
+  } else {
+    ESP_LOGI(TAG, "query = %s\n", query_str);
+    if (httpd_query_key_value(query_str, "brand", value, BUFFER_SIZE) ==
+        ESP_OK) {
+      set_ac_obj(AC_BRAND, atoi(value));
+      response = get_ir_handle();
+    } else if (httpd_query_key_value(query_str, "protocol", value,
+                                     BUFFER_SIZE) == ESP_OK) {
+      set_ac_obj(AC_PROTOCOL, atoi(value));
+      response = get_ir_handle();
+    } else if (httpd_query_key_value(query_str, "power", value, BUFFER_SIZE) ==
+               ESP_OK) {
+      set_ac_obj(AC_POWER, atoi(value));
+      response = get_ir_handle();
+    } else if (httpd_query_key_value(query_str, "mode", value, BUFFER_SIZE) ==
+               ESP_OK) {
+      set_ac_obj(AC_MODE, atoi(value));
+      response = get_ir_handle();
+    } else if (httpd_query_key_value(query_str, "temperature", value,
+                                     BUFFER_SIZE) == ESP_OK) {
+      set_ac_obj(AC_TEMPERATURE, atoi(value));
+      response = get_ir_handle();
+    } else if (httpd_query_key_value(query_str, "fan", value, BUFFER_SIZE) ==
+               ESP_OK) {
+      set_ac_obj(AC_FAN, atoi(value));
+      response = get_ir_handle();
+    } else if (httpd_query_key_value(query_str, "fan_speed", value,
+                                     BUFFER_SIZE) == ESP_OK) {
+      set_ac_obj(AC_FAN_SPEED, atoi(value));
+      response = get_ir_handle();
+    } else if (httpd_query_key_value(query_str, "fan_direction", value,
+                                     BUFFER_SIZE) == ESP_OK) {
+      set_ac_obj(AC_FAN_DIRECVTION, atoi(value));
+      response = get_ir_handle();
+    }
   }
   if (response != NULL) {
     httpd_resp_sendstr(req, response);
     free(response);
+  } else {
+    httpd_resp_sendstr(req, "");
   }
   return ESP_OK;
 }
 
 static esp_err_t root_handler(httpd_req_t *req) {
-  wifi_mode_t wifi_mode;
-  esp_wifi_get_mode(&wifi_mode);
-  if (wifi_mode == WIFI_MODE_STA) {
+  wifi_ap_record_t record;
+  if (esp_wifi_sta_get_ap_info(&record) == ESP_OK) {
     httpd_resp_sendstr(req, (const char *)root_html);
   } else {
     httpd_resp_sendstr(req, (const char *)wificonfig_html);
@@ -127,20 +159,15 @@ static esp_err_t wificonfig_handler(httpd_req_t *req) {
   return ESP_OK;
 }
 
-static esp_err_t irext_handler(httpd_req_t *req) {
-  httpd_resp_sendstr(req, (char *)req->user_ctx);
-  return ESP_OK;
-}
-
 static httpd_handle_t server = NULL;
 
 void start_webserver(void) {
-  ESP_LOGI(TAG, "try to start web server");
   if (server != NULL) {
     shutdown_webserver();
   }
   ESP_LOGI(TAG, "web server started");
   httpd_config_t config = HTTPD_DEFAULT_CONFIG();
+  config.stack_size = 10240;
   config.lru_purge_enable = true;
   const httpd_uri_t wificonfig_post = {.uri = "/wificonfig",
                                        .method = HTTP_POST,
@@ -165,18 +192,12 @@ void start_webserver(void) {
   const httpd_uri_t index_get = {.uri = "/index",
                                  .method = HTTP_GET,
                                  .handler = index_handler,
-                                 .user_ctx = (void *)config_json};
-
-  // const httpd_uri_t irext = {.uri = "/irext.js",
-  //                            .method = HTTP_GET,
-  //                            .handler = irext_handler,
-  //                            .user_ctx = (void *)irext_js};
+                                 .user_ctx = NULL};
 
   ESP_LOGI(TAG, "Starting server on port: '%d'", config.server_port);
 
   if (httpd_start(&server, &config) == ESP_OK) {
     // Set URL handlers
-    ESP_LOGI(TAG, "Registering URL handlers");
     httpd_register_uri_handler(server, &wificonfig_post);
     httpd_register_uri_handler(server, &wificonfig_get);
     httpd_register_uri_handler(server, &root);

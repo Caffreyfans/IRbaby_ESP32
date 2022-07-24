@@ -944,7 +944,7 @@ path='#path#' key='#key#' render='#render#'>\
 			log("ele timeout: " + timeout);
 			sendGetObject(path, { [key]: value }, function (resp) {
 				var json = JSON.parse(resp);
-				if (json.hasOwnProperty("__message__")) {
+				if (json != null && json.hasOwnProperty("__message__")) {
 					messageShow(true, json["__message__"]);
 				}
 				page_update_values(json);

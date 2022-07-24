@@ -12,9 +12,16 @@
 #include "esp_spi_flash.h"
 #include "esp_spiffs.h"
 #include "esp_wifi.h"
+#include "irext_api.h"
+#include "obj.h"
 #include "version.h"
 #include "wifimanager.h"
 #define SCAN_LIST_SIZE 10
+
+static const char *TAG = "handler.c";
+
+#define CHECK_IS_NULL(value, ret) \
+  if (value == NULL) return ret;
 
 char *connect_wifi_handle(const char *ssid, const char *pass) {
   char *response = NULL;
@@ -60,7 +67,6 @@ char *get_info_handle() {
   cJSON *root = cJSON_CreateObject();
   if (root == NULL) return NULL;
 
-  time_t now;
 #define RET_BUFFER_SIZE 128
 #define TMP_BUFFER_SIZE 64
   char ret_buffer[RET_BUFFER_SIZE];
@@ -139,19 +145,10 @@ char *get_ir_handle() {
   char *response = NULL;
   cJSON *root = cJSON_CreateObject();
   if (root == NULL) return NULL;
-  cJSON_AddStringToObject(root, "protocol", "24");
-  cJSON_AddStringToObject(root, "model", "-1");
-  cJSON_AddStringToObject(root, "power", "1");
-  cJSON_AddStringToObject(root, "mode", "1");
-  cJSON_AddStringToObject(root, "temperature", "26");
-  cJSON_AddStringToObject(root, "fanspeed", "1");
-  cJSON_AddStringToObject(root, "swingv", "0");
-  cJSON_AddStringToObject(root, "light", "1");
-  cJSON_AddStringToObject(root, "quiet", "0");
-  cJSON_AddStringToObject(root, "turbo", "0");
-  cJSON_AddStringToObject(root, "econo", "0");
-  cJSON_AddStringToObject(root, "filter", "0");
-  cJSON_AddStringToObject(root, "beep", "0");
+  ac_property *ir_obj = get_ac_obj();
+  for (int i = 0; i < get_ac_obj_property_len(); i++) {
+    cJSON_AddNumberToObject(root, ir_obj[i].key, ir_obj[i].value);
+  }
   response = cJSON_Print(root);
   cJSON_Delete(root);
   return response;
@@ -172,5 +169,35 @@ char *get_more_handle() {
   if (root == NULL) return NULL;
   response = cJSON_Print(root);
   cJSON_Delete(root);
+  return response;
+}
+
+char *web_get_index_handle() {
+  extern const char config_json[] asm("_binary_config_json_start");
+  char *response = NULL;
+  cJSON *root = cJSON_Parse(config_json);
+  CHECK_IS_NULL(root, response);
+  cJSON *tabs = cJSON_GetObjectItem(root, "tabs");
+  CHECK_IS_NULL(tabs, response);
+  cJSON *tab0 = cJSON_GetArrayItem(tabs, 0);
+  CHECK_IS_NULL(tab0, response);
+  cJSON *contents = cJSON_GetObjectItem(tab0, "contents");
+  CHECK_IS_NULL(contents, response);
+  cJSON *content0 = cJSON_GetArrayItem(contents, 0);
+  CHECK_IS_NULL(content0, response);
+  cJSON *cells = cJSON_GetObjectItem(content0, "cells");
+  CHECK_IS_NULL(cells, response);
+  cJSON *cell2 = cJSON_GetArrayItem(cells, 1);
+  CHECK_IS_NULL(cell2, response);
+
+  cJSON *token_obj = irext_login("cdf33048c9dbef2962b0f915bc7e420c",
+                                 "f00f57af376c66ca1355cfe109400dd2", "2");
+  char *token_str = cJSON_GetObjectItem(token_obj, "token")->valuestring;
+  int id = cJSON_GetObjectItem(token_obj, "id")->valueint;
+  ac_property *ir_obj = get_ac_obj();
+  const int brand_id = ir_obj[AC_BRAND].value;
+  cJSON *indexes_obj = irext_list_indexes(1, brand_id, id, token_str);
+  cJSON_ReplaceItemInObject(cell2, "options", indexes_obj);
+  response = cJSON_PrintUnformatted(root);
   return response;
 }
