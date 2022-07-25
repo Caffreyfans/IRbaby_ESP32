@@ -8,6 +8,7 @@
 #define HANDLER_H_
 #include "esp_err.h"
 
+char *get_protocol_list(int brand_id);
 char *connect_wifi_handle(const char *ssid, const char *pass);
 char *web_get_index_handle();
 char *scan_wifi_handle();

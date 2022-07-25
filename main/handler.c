@@ -201,3 +201,26 @@ char *web_get_index_handle() {
   response = cJSON_PrintUnformatted(root);
   return response;
 }
+
+char *get_protocol_list(int brand_id) {
+  char *response = NULL;
+  cJSON *root = cJSON_CreateObject();
+  cJSON *token_obj = irext_login("cdf33048c9dbef2962b0f915bc7e420c",
+                                 "f00f57af376c66ca1355cfe109400dd2", "2");
+  char *token_str = cJSON_GetObjectItem(token_obj, "token")->valuestring;
+  int id = cJSON_GetObjectItem(token_obj, "id")->valueint;
+  cJSON *indexes_obj = irext_list_indexes(1, brand_id, id, token_str);
+
+  if (indexes_obj != NULL) {
+    // update protocol
+    cJSON *item = cJSON_GetArrayItem(indexes_obj, 0);
+    set_ac_obj(AC_PROTOCOL, cJSON_GetObjectItem(item, "value")->valueint);
+    cJSON_AddItemToObject(root, "__protocol__", indexes_obj);
+    ac_property *ir_obj = get_ac_obj();
+    for (int i = 0; i < get_ac_obj_property_len(); i++) {
+      cJSON_AddNumberToObject(root, ir_obj[i].key, ir_obj[i].value);
+    }
+    response = cJSON_PrintUnformatted(root);
+  }
+  return response;
+}

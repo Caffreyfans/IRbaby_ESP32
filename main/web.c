@@ -52,11 +52,10 @@ static esp_err_t index_handler(httpd_req_t *req) {
         break;
     }
   } else {
-    ESP_LOGI(TAG, "query = %s\n", query_str);
     if (httpd_query_key_value(query_str, "brand", value, BUFFER_SIZE) ==
         ESP_OK) {
       set_ac_obj(AC_BRAND, atoi(value));
-      response = get_ir_handle();
+      response = get_protocol_list(atoi(value));
     } else if (httpd_query_key_value(query_str, "protocol", value,
                                      BUFFER_SIZE) == ESP_OK) {
       set_ac_obj(AC_PROTOCOL, atoi(value));

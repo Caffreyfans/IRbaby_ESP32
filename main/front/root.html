@@ -765,6 +765,24 @@
 				ele_message.classList.remove('ui_opacity_1');
 			}
 		}
+		function update_protocol(arg) {
+			var ele = document.querySelector("[key=\"protocol\"]");
+			if (ele) {
+				log(ele);
+				var render = ele.getAttribute("render");
+				var o = "";
+				if (render == "select") {//(node_name == "SELECT") {//select
+					for (var i = 0; i < arg.length; i++) {
+						var oi = TEMPLATE_CELL_SELECT_OPTION;
+						oi = oi.replace("#label#", arg[i].label);
+						oi = oi.replace("#value#", arg[i].value);
+						o += oi;
+					}
+					ele.innerHTML = o;
+				}
+
+			}
+		}
 		const href = window.location.href;
 		const local_mode = (href.startsWith("http://127.0.0.1")
 			|| href.indexOf(":5500") > 0 || !href.startsWith("http"));
@@ -790,11 +808,7 @@
 			xhr.onload = function (e) {
 				if (this.status == 200) {
 					const res = this.responseText;
-					if (res.length < 300) {
-						log("GET: " + path + " res->\n" + res);
-					} else {
-						log("GET: " + path + " res->\n" + res.substr(0, 100) + "...");
-					}
+					log("GET: " + path + " res->\n" + res);
 					toastShow(false);
 					if (handler) {
 						handler(res);
@@ -943,11 +957,14 @@ path='#path#' key='#key#' render='#render#'>\
 			}
 			log("ele timeout: " + timeout);
 			sendGetObject(path, { [key]: value }, function (resp) {
-				var json = JSON.parse(resp);
-				if (json != null && json.hasOwnProperty("__message__")) {
-					messageShow(true, json["__message__"]);
+				var value = JSON.parse(resp);
+				if (value != null && value.hasOwnProperty("__message__")) {
+					messageShow(true, value["__message__"]);
+					page_update_values(value);
+				} else if (value != null && value.hasOwnProperty("__protocol__")) {
+					update_protocol(value["__protocol__"]);
 				}
-				page_update_values(json);
+				page_update_values(value);
 			}, timeout);
 		}
 		var tab_record = {};
@@ -1204,8 +1221,7 @@ path='#path#' key='#key#' render='#render#'>\
 			log("init_page: hash->" + hash);
 			var _handler = function (resp) {
 				var j = JSON.parse(resp);
-				log("root:");
-				log(j);
+				log("root:" + j);
 				gen_root(j);
 				if (!page[hash]) {
 					document.body.scrollTop = document.documentElement.scrollTop = 0;
