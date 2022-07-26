@@ -7,13 +7,13 @@
 #include "handler.h"
 
 #include "cJSON.h"
+#include "conf.h"
 #include "esp_log.h"
 #include "esp_netif.h"
 #include "esp_spi_flash.h"
 #include "esp_spiffs.h"
 #include "esp_wifi.h"
 #include "irext_api.h"
-#include "obj.h"
 #include "version.h"
 #include "wifimanager.h"
 #define SCAN_LIST_SIZE 10
@@ -22,6 +22,19 @@ static const char *TAG = "handler.c";
 
 #define CHECK_IS_NULL(value, ret) \
   if (value == NULL) return ret;
+
+static char *get_conf_handle(conf_type type) {
+  char *response = NULL;
+  cJSON *root = cJSON_CreateObject();
+  if (root == NULL) return NULL;
+  property_t *property = irbaby_get_conf(type);
+  for (int i = 0; i < irbaby_get_conf_num(type); i++) {
+    cJSON_AddNumberToObject(root, property[i].key, property[i].value);
+  }
+  response = cJSON_Print(root);
+  cJSON_Delete(root);
+  return response;
+}
 
 char *connect_wifi_handle(const char *ssid, const char *pass) {
   char *response = NULL;
@@ -141,38 +154,7 @@ char *get_info_handle() {
   return response;
 }
 
-char *get_ir_handle() {
-  char *response = NULL;
-  cJSON *root = cJSON_CreateObject();
-  if (root == NULL) return NULL;
-  ac_property *ir_obj = get_ac_obj();
-  for (int i = 0; i < get_ac_obj_property_len(); i++) {
-    cJSON_AddNumberToObject(root, ir_obj[i].key, ir_obj[i].value);
-  }
-  response = cJSON_Print(root);
-  cJSON_Delete(root);
-  return response;
-}
-
-char *get_gpio_handle() {
-  char *response = NULL;
-  cJSON *root = cJSON_CreateObject();
-  if (root == NULL) return NULL;
-  response = cJSON_Print(root);
-  cJSON_Delete(root);
-  return response;
-}
-
-char *get_more_handle() {
-  char *response = NULL;
-  cJSON *root = cJSON_CreateObject();
-  if (root == NULL) return NULL;
-  response = cJSON_Print(root);
-  cJSON_Delete(root);
-  return response;
-}
-
-char *web_get_index_handle() {
+char *get_index_handle() {
   extern const char config_json[] asm("_binary_config_json_start");
   char *response = NULL;
   cJSON *root = cJSON_Parse(config_json);
@@ -194,15 +176,15 @@ char *web_get_index_handle() {
                                  "f00f57af376c66ca1355cfe109400dd2", "2");
   char *token_str = cJSON_GetObjectItem(token_obj, "token")->valuestring;
   int id = cJSON_GetObjectItem(token_obj, "id")->valueint;
-  ac_property *ir_obj = get_ac_obj();
-  const int brand_id = ir_obj[AC_BRAND].value;
+  property_t *property = irbaby_get_conf(CONF_AC);
+  const int brand_id = property[CONF_AC_BRAND].value;
   cJSON *indexes_obj = irext_list_indexes(1, brand_id, id, token_str);
   cJSON_ReplaceItemInObject(cell2, "options", indexes_obj);
   response = cJSON_PrintUnformatted(root);
   return response;
 }
 
-char *get_protocol_list(int brand_id) {
+char *get_protocol_handle(int brand_id) {
   char *response = NULL;
   cJSON *root = cJSON_CreateObject();
   cJSON *token_obj = irext_login("cdf33048c9dbef2962b0f915bc7e420c",
@@ -214,13 +196,37 @@ char *get_protocol_list(int brand_id) {
   if (indexes_obj != NULL) {
     // update protocol
     cJSON *item = cJSON_GetArrayItem(indexes_obj, 0);
-    set_ac_obj(AC_PROTOCOL, cJSON_GetObjectItem(item, "value")->valueint);
+    irbaby_set_conf(CONF_AC, CONF_AC_PROTOCOL,
+                    cJSON_GetObjectItem(item, "value")->valueint);
     cJSON_AddItemToObject(root, "__protocol__", indexes_obj);
-    ac_property *ir_obj = get_ac_obj();
-    for (int i = 0; i < get_ac_obj_property_len(); i++) {
-      cJSON_AddNumberToObject(root, ir_obj[i].key, ir_obj[i].value);
+    property_t *property = irbaby_get_conf(CONF_AC);
+    for (int i = 0; i < irbaby_get_conf_num(CONF_AC); i++) {
+      cJSON_AddNumberToObject(root, property[i].key, property[i].value);
     }
     response = cJSON_PrintUnformatted(root);
   }
   return response;
+}
+
+char *get_ir_handle() { return get_conf_handle(CONF_AC); }
+
+char *get_gpio_handle() { return get_conf_handle(CONF_PIN); }
+
+char *get_more_handle() {
+  char *response = NULL;
+  cJSON *root = cJSON_CreateObject();
+  if (root != NULL) {
+    response = cJSON_PrintUnformatted(root);
+  }
+  return response;
+}
+
+char *set_ir_handle(ac_ops ops, int value) {
+  irbaby_set_conf(CONF_AC, ops, value);
+  return get_ir_handle();
+}
+
+char *set_gpio_handle(pin_ops ops, int value) {
+  irbaby_set_conf(CONF_PIN, ops, value);
+  return get_gpio_handle();
 }

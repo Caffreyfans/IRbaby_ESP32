@@ -1262,7 +1262,7 @@
                         {
                             "render": "select",
                             "label": "LED WiFi",
-                            "key": "pin_led_wifi",
+                            "key": "pin_led",
                             "options": [
                                 {
                                     "label": "D0 (GPIO16)",
@@ -1271,33 +1271,6 @@
                                 {
                                     "label": "D4 (GPIO2)",
                                     "value": "2"
-                                }
-                            ]
-                        },
-                        {
-                            "render": "select",
-                            "label": "LED IR",
-                            "key": "pin_led_ir",
-                            "options": [
-                                {
-                                    "label": "D1 (GPIO5)",
-                                    "value": "5"
-                                },
-                                {
-                                    "label": "D2 (GPIO4)",
-                                    "value": "4"
-                                },
-                                {
-                                    "label": "D5 (GPIO14)",
-                                    "value": "14"
-                                },
-                                {
-                                    "label": "D6 (GPIO12)",
-                                    "value": "12"
-                                },
-                                {
-                                    "label": "D7 (GPIO13)",
-                                    "value": "13"
                                 }
                             ]
                         }
@@ -1310,7 +1283,7 @@
                         {
                             "render": "select",
                             "label": "KEY",
-                            "key": "pin_key",
+                            "key": "pin_button",
                             "options": [
                                 {
                                     "label": "D3 (GPIO0)",

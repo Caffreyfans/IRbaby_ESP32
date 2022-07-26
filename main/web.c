@@ -6,6 +6,7 @@
  */
 #include "web.h"
 
+#include "conf.h"
 #include "esp_err.h"
 #include "esp_event.h"
 #include "esp_log.h"
@@ -13,7 +14,6 @@
 #include "form_parser.h"
 #include "handler.h"
 #include "nvs_flash.h"
-#include "obj.h"
 #include "string.h"
 #include "sys/param.h"
 
@@ -28,13 +28,13 @@ static esp_err_t index_handler(httpd_req_t *req) {
   char *response = NULL;
 #define BUFFER_SIZE 512
   char query_str[BUFFER_SIZE];
-  char value[BUFFER_SIZE];
+  char buffer[BUFFER_SIZE];
   httpd_req_get_url_query_str(req, query_str, BUFFER_SIZE);
-  if (httpd_query_key_value(query_str, "page", value, BUFFER_SIZE) == ESP_OK) {
-    response = web_get_index_handle();
-  } else if (httpd_query_key_value(query_str, "sync", value, BUFFER_SIZE) ==
+  if (httpd_query_key_value(query_str, "page", buffer, BUFFER_SIZE) == ESP_OK) {
+    response = get_index_handle();
+  } else if (httpd_query_key_value(query_str, "sync", buffer, BUFFER_SIZE) ==
              ESP_OK) {
-    int tab = atoi(value);
+    int tab = atoi(buffer);
     switch (tab) {
       case 0:
         response = get_ir_handle();
@@ -52,38 +52,48 @@ static esp_err_t index_handler(httpd_req_t *req) {
         break;
     }
   } else {
-    if (httpd_query_key_value(query_str, "brand", value, BUFFER_SIZE) ==
+    // ir
+    if (httpd_query_key_value(query_str, "brand", buffer, BUFFER_SIZE) ==
         ESP_OK) {
-      set_ac_obj(AC_BRAND, atoi(value));
-      response = get_protocol_list(atoi(value));
-    } else if (httpd_query_key_value(query_str, "protocol", value,
+      response = get_protocol_handle(atoi(buffer));
+    } else if (httpd_query_key_value(query_str, "protocol", buffer,
                                      BUFFER_SIZE) == ESP_OK) {
-      set_ac_obj(AC_PROTOCOL, atoi(value));
-      response = get_ir_handle();
-    } else if (httpd_query_key_value(query_str, "power", value, BUFFER_SIZE) ==
+      response = set_ir_handle(CONF_AC_PROTOCOL, atoi(buffer));
+    } else if (httpd_query_key_value(query_str, "power", buffer, BUFFER_SIZE) ==
                ESP_OK) {
-      set_ac_obj(AC_POWER, atoi(value));
-      response = get_ir_handle();
-    } else if (httpd_query_key_value(query_str, "mode", value, BUFFER_SIZE) ==
+      response = set_ir_handle(CONF_AC_POWER, atoi(buffer));
+    } else if (httpd_query_key_value(query_str, "mode", buffer, BUFFER_SIZE) ==
                ESP_OK) {
-      set_ac_obj(AC_MODE, atoi(value));
-      response = get_ir_handle();
-    } else if (httpd_query_key_value(query_str, "temperature", value,
+      response = set_ir_handle(CONF_AC_MODE, atoi(buffer));
+    } else if (httpd_query_key_value(query_str, "temperature", buffer,
                                      BUFFER_SIZE) == ESP_OK) {
-      set_ac_obj(AC_TEMPERATURE, atoi(value));
-      response = get_ir_handle();
-    } else if (httpd_query_key_value(query_str, "fan", value, BUFFER_SIZE) ==
+      response = set_ir_handle(CONF_AC_TEMPERATURE, atoi(buffer));
+    } else if (httpd_query_key_value(query_str, "fan", buffer, BUFFER_SIZE) ==
                ESP_OK) {
-      set_ac_obj(AC_FAN, atoi(value));
-      response = get_ir_handle();
-    } else if (httpd_query_key_value(query_str, "fan_speed", value,
+      response = set_ir_handle(CONF_AC_FAN, atoi(buffer));
+    } else if (httpd_query_key_value(query_str, "fan_speed", buffer,
                                      BUFFER_SIZE) == ESP_OK) {
-      set_ac_obj(AC_FAN_SPEED, atoi(value));
-      response = get_ir_handle();
-    } else if (httpd_query_key_value(query_str, "fan_direction", value,
-                                     BUFFER_SIZE) == ESP_OK) {
-      set_ac_obj(AC_FAN_DIRECVTION, atoi(value));
-      response = get_ir_handle();
+      response = set_ir_handle(CONF_AC_FAN_SPEED, atoi(buffer));
+    }
+    if (httpd_query_key_value(query_str, "fan_direction", buffer,
+                              BUFFER_SIZE) == ESP_OK) {
+      response = set_ir_handle(CONF_AC_FAN_DIRECVTION, atoi(buffer));
+    }
+    if (httpd_query_key_value(query_str, "pin_ir_send", buffer, BUFFER_SIZE) ==
+        ESP_OK) {
+      response = set_gpio_handle(CONF_PIN_IR_SEND, atoi(buffer));
+    }
+    if (httpd_query_key_value(query_str, "pin_ir_recv", buffer, BUFFER_SIZE) ==
+        ESP_OK) {
+      response = set_gpio_handle(CONF_PIN_IR_RECV, atoi(buffer));
+    }
+    if (httpd_query_key_value(query_str, "pin_led", buffer, BUFFER_SIZE) ==
+        ESP_OK) {
+      response = set_gpio_handle(CONF_PIN_LED, atoi(buffer));
+    }
+    if (httpd_query_key_value(query_str, "pin_button", buffer, BUFFER_SIZE) ==
+        ESP_OK) {
+      response = set_gpio_handle(CONF_PIN_BUTTON, atoi(buffer));
     }
   }
   if (response != NULL) {
@@ -94,7 +104,6 @@ static esp_err_t index_handler(httpd_req_t *req) {
   }
   return ESP_OK;
 }
-
 static esp_err_t root_handler(httpd_req_t *req) {
   wifi_ap_record_t record;
   if (esp_wifi_sta_get_ap_info(&record) == ESP_OK) {
