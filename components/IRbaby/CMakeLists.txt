@@ -1,3 +1,7 @@
+
+option(ESP32 "build ESP32?" ON)
+
+
 file(GLOB irext_srcs "IRbaby_SDK/3rdparty/IRext/*.c")
 set(srcs "IRbaby_SDK/3rdparty/coreHTTP/coreHTTP/source/dependency/3rdparty/http_parser/http_parser.c"
         "IRbaby_SDK/3rdparty/coreHTTP/coreHTTP/source/core_http_client"
@@ -19,5 +23,5 @@ idf_component_register(SRCS ${irext_srcs} ${srcs}
                        INCLUDE_DIRS ${includes}
                        REQUIRES lwip freertos)
 
-target_compile_definitions(${COMPONENT_LIB} PUBLIC -DHTTP_DO_NOT_USE_CUSTOM_CONFIG=1)
+target_compile_definitions(${COMPONENT_LIB} PUBLIC -DHTTP_DO_NOT_USE_CUSTOM_CONFIG=1 -DESP32)
 target_compile_options(${COMPONENT_LIB} PUBLIC -Wno-stringop-truncation)
