@@ -12,11 +12,11 @@
 #include "esp_log.h"
 #include "esp_wifi.h"
 #include "form_parser.h"
-#include "handler.h"
+#include "ir.h"
 #include "nvs_flash.h"
 #include "string.h"
 #include "sys/param.h"
-
+#include "web_handler.h"
 static const char *TAG = "web.c";
 
 extern const char wificonfig_html[] asm("_binary_wificonfig_html_start");
@@ -55,29 +55,35 @@ static esp_err_t index_handler(httpd_req_t *req) {
     // ir
     if (httpd_query_key_value(query_str, "brand", buffer, BUFFER_SIZE) ==
         ESP_OK) {
-      response = get_protocol_handle(atoi(buffer));
+      response = set_ir_handle(CONF_AC_BRAND, (atoi(buffer)));
     } else if (httpd_query_key_value(query_str, "protocol", buffer,
                                      BUFFER_SIZE) == ESP_OK) {
       response = set_ir_handle(CONF_AC_PROTOCOL, atoi(buffer));
     } else if (httpd_query_key_value(query_str, "power", buffer, BUFFER_SIZE) ==
                ESP_OK) {
       response = set_ir_handle(CONF_AC_POWER, atoi(buffer));
+      ir_send();
     } else if (httpd_query_key_value(query_str, "mode", buffer, BUFFER_SIZE) ==
                ESP_OK) {
       response = set_ir_handle(CONF_AC_MODE, atoi(buffer));
+      ir_send();
     } else if (httpd_query_key_value(query_str, "temperature", buffer,
                                      BUFFER_SIZE) == ESP_OK) {
       response = set_ir_handle(CONF_AC_TEMPERATURE, atoi(buffer));
+      ir_send();
     } else if (httpd_query_key_value(query_str, "fan", buffer, BUFFER_SIZE) ==
                ESP_OK) {
       response = set_ir_handle(CONF_AC_FAN, atoi(buffer));
+      ir_send();
     } else if (httpd_query_key_value(query_str, "fan_speed", buffer,
                                      BUFFER_SIZE) == ESP_OK) {
       response = set_ir_handle(CONF_AC_FAN_SPEED, atoi(buffer));
+      ir_send();
     }
     if (httpd_query_key_value(query_str, "fan_direction", buffer,
                               BUFFER_SIZE) == ESP_OK) {
       response = set_ir_handle(CONF_AC_FAN_DIRECVTION, atoi(buffer));
+      ir_send();
     }
     if (httpd_query_key_value(query_str, "pin_ir_send", buffer, BUFFER_SIZE) ==
         ESP_OK) {

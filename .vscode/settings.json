@@ -13,7 +13,8 @@
         "irbaby.h": "c",
         "ir_decode.h": "c",
         "byteswap.h": "c",
-        "conf.h": "c"
+        "conf.h": "c",
+        "esp_err.h": "c"
     },
-    "idf.adapterTargetName": "esp32C3"
+    "idf.adapterTargetName": "esp32c3"
 }

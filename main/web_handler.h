@@ -2,14 +2,13 @@
  * @Author: Caffreyfans
  * @Date: 2021-06-19 17:51:23
  * @LastEditTime: 2021-06-26 23:49:29
- * @Description:
+ * @Description: this is web handler for response ajax
  */
 #ifndef HANDLER_H_
 #define HANDLER_H_
 #include "conf.h"
 #include "esp_err.h"
 
-char *get_protocol_handle(int brand_id);
 char *connect_wifi_handle(const char *ssid, const char *pass);
 char *get_index_handle();
 char *scan_wifi_handle();

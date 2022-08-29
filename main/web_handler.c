@@ -4,7 +4,7 @@
  * @LastEditTime: 2021-06-26 23:52:02
  * @Description:
  */
-#include "handler.h"
+#include "web_handler.h"
 
 #include "cJSON.h"
 #include "conf.h"
@@ -184,7 +184,7 @@ char *get_index_handle() {
   return response;
 }
 
-char *get_protocol_handle(int brand_id) {
+static char *get_protocol_handle(int brand_id) {
   char *response = NULL;
   cJSON *root = cJSON_CreateObject();
   cJSON *token_obj = irext_login("cdf33048c9dbef2962b0f915bc7e420c",
@@ -222,8 +222,16 @@ char *get_more_handle() {
 }
 
 char *set_ir_handle(ac_ops ops, int value) {
-  irbaby_set_conf(CONF_AC, ops, value);
-  return get_ir_handle();
+  switch (ops) {
+    case CONF_AC_BRAND:
+      return get_protocol_handle(value);
+      break;
+
+    default:
+      irbaby_set_conf(CONF_AC, ops, value);
+      return get_ir_handle();
+      break;
+  }
 }
 
 char *set_gpio_handle(pin_ops ops, int value) {

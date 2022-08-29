@@ -1,10 +1,13 @@
 #include "conf.h"
+
 #include <stdio.h>
 property_t ac_conf[] = {
     {.key = "brand", .value = 4},        {.key = "protocol", .value = 2582},
     {.key = "power", .value = 1},        {.key = "mode", .value = 1},
     {.key = "temperature", .value = 26}, {.key = "fan", .value = 1},
-    {.key = "fan_speed", .value = 1},    {.key = "fan_direction", .value = 0}};
+    {.key = "fan_speed", .value = 1},    {.key = "fan_direction", .value = 0},
+    {.key = "display", .value = 1},      {.key = "sleep", .value = 0},
+    {.key = "timer", .value = 0}};
 
 property_t pin_conf[] = {
     {.key = "pin_ir_send", .value = 14},

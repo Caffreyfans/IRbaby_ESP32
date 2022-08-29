@@ -28,6 +28,9 @@ typedef enum {
   CONF_AC_FAN,
   CONF_AC_FAN_SPEED,
   CONF_AC_FAN_DIRECVTION,
+  CONF_AC_DISPLAY,
+  CONF_AC_SLEEP,
+  CONF_AC_TIMER,
 } ac_ops;
 
 typedef enum {
