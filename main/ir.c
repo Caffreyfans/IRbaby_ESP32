@@ -1,7 +1,10 @@
 #include "ir.h"
 
 #include "irbaby.h"
-void ir_send() {
+#include "esp_log.h"
+static const char *TAG = "IR";
+
+int ir_transmission() {
   property_t *ac_conf = irbaby_get_conf(CONF_AC);
   property_t *ac_pin = irbaby_get_conf(CONF_PIN);
   int protocol = ac_conf[CONF_AC_PROTOCOL].value;
@@ -17,5 +20,7 @@ void ir_send() {
       .ac_wind_speed = ac_conf[CONF_AC_FAN_SPEED].value};
   char protocol_name[32];
   snprintf(protocol_name, 32, "new_ac_%d", protocol);
+  ESP_LOGI(TAG, "%d\n", __LINE__);
   irbaby_send(protocol_name, &status);
+  return 0;
 }

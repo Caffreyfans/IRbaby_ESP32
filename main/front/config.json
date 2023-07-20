@@ -1310,6 +1310,11 @@
                         },
                         {
                             "render": "text",
+                            "label": "Total Heap",
+                            "key": "total_heap"
+                        },
+                        {
+                            "render": "text",
                             "label": "Free Heap",
                             "key": "free_heap"
                         },
@@ -1357,16 +1362,6 @@
                         },
                         {
                             "render": "text",
-                            "label": "Sketch Size",
-                            "key": "sketch_size"
-                        },
-                        {
-                            "render": "text",
-                            "label": "Free Sketch Space",
-                            "key": "free_sketch_space"
-                        },
-                        {
-                            "render": "text",
                             "label": "Core Version",
                             "key": "core_version"
                         },
@@ -1390,11 +1385,6 @@
                             "render": "text",
                             "label": "Flash Size",
                             "key": "flash_size"
-                        },
-                        {
-                            "render": "text",
-                            "label": "Flash Speed",
-                            "key": "flash_speed"
                         },
                         {
                             "render": "text",
@@ -1444,17 +1434,6 @@
                             "label": "Reboot",
                             "confirm": "Are you sure to reboot?",
                             "key": "reboot"
-                        }
-                    ]
-                },
-                {
-                    "render": "cells",
-                    "label": "Sensor",
-                    "cells": [
-                        {
-                            "render": "url",
-                            "label": "Sensor Page",
-                            "key": "#sensor"
                         }
                     ]
                 },

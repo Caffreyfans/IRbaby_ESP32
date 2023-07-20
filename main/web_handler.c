@@ -19,7 +19,8 @@
 #define SCAN_LIST_SIZE 10
 
 static const char *TAG = "handler.c";
-
+static const char *APP_KEY = "cdf33048c9dbef2962b0f915bc7e420c";
+static const char *APP_SECRET = "f00f57af376c66ca1355cfe109400dd2";
 #define CHECK_IS_NULL(value, ret) \
   if (value == NULL) return ret;
 
@@ -85,15 +86,19 @@ char *get_info_handle() {
   char ret_buffer[RET_BUFFER_SIZE];
   char tmp_buffer[TMP_BUFFER_SIZE];
 
-  int64_t tick = esp_timer_get_time();
+  int64_t tick = xTaskGetTickCount();
   snprintf(ret_buffer, RET_BUFFER_SIZE, "%dS", pdTICKS_TO_MS(tick) / 1000);
   cJSON_AddStringToObject(root, "boot", ret_buffer);
+
+  itoa(heap_caps_get_total_size(MALLOC_CAP_32BIT) / 1024, tmp_buffer, 10);
+  snprintf(ret_buffer, RET_BUFFER_SIZE, "%sKB", tmp_buffer);
+  cJSON_AddStringToObject(root, "total_heap", ret_buffer);
 
   itoa(heap_caps_get_free_size(MALLOC_CAP_32BIT) / 1024, tmp_buffer, 10);
   snprintf(ret_buffer, RET_BUFFER_SIZE, "%sKB", tmp_buffer);
   cJSON_AddStringToObject(root, "free_heap", ret_buffer);
 
-  const char *reset_reason_str[] = {"can not be determined",
+  static const char *reset_reason_str[] = {"can not be determined",
                                     "power-on event",
                                     "external pin",
                                     "esp_restart",
@@ -142,7 +147,7 @@ char *get_info_handle() {
 
   // cJSON_AddStringToObject(root, "flash_speed", );
   size_t total_bytes, used_bytes;
-  esp_spiffs_info(NULL, &total_bytes, &used_bytes);
+  esp_spiffs_info("spiffs", &total_bytes, &used_bytes);
 
   snprintf(ret_buffer, RET_BUFFER_SIZE, "%dKB", total_bytes / 1024);
   cJSON_AddStringToObject(root, "fs_total", ret_buffer);
@@ -172,8 +177,7 @@ char *get_index_handle() {
   cJSON *cell2 = cJSON_GetArrayItem(cells, 1);
   CHECK_IS_NULL(cell2, response);
 
-  cJSON *token_obj = irext_login("cdf33048c9dbef2962b0f915bc7e420c",
-                                 "f00f57af376c66ca1355cfe109400dd2", "2");
+  cJSON *token_obj = irext_login(APP_KEY, APP_SECRET, "2");
   char *token_str = cJSON_GetObjectItem(token_obj, "token")->valuestring;
   int id = cJSON_GetObjectItem(token_obj, "id")->valueint;
   property_t *property = irbaby_get_conf(CONF_AC);
@@ -187,8 +191,7 @@ char *get_index_handle() {
 static char *get_protocol_handle(int brand_id) {
   char *response = NULL;
   cJSON *root = cJSON_CreateObject();
-  cJSON *token_obj = irext_login("cdf33048c9dbef2962b0f915bc7e420c",
-                                 "f00f57af376c66ca1355cfe109400dd2", "2");
+  cJSON *token_obj = irext_login(APP_KEY, APP_SECRET, "2");
   char *token_str = cJSON_GetObjectItem(token_obj, "token")->valuestring;
   int id = cJSON_GetObjectItem(token_obj, "id")->valueint;
   cJSON *indexes_obj = irext_list_indexes(1, brand_id, id, token_str);

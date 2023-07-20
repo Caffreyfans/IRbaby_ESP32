@@ -62,28 +62,34 @@ static esp_err_t index_handler(httpd_req_t *req) {
     } else if (httpd_query_key_value(query_str, "power", buffer, BUFFER_SIZE) ==
                ESP_OK) {
       response = set_ir_handle(CONF_AC_POWER, atoi(buffer));
-      ir_send();
+      ESP_LOGI(TAG, "%d\n", __LINE__);
+      ir_transmission();
     } else if (httpd_query_key_value(query_str, "mode", buffer, BUFFER_SIZE) ==
                ESP_OK) {
       response = set_ir_handle(CONF_AC_MODE, atoi(buffer));
-      ir_send();
+      ESP_LOGI(TAG, "%d\n", __LINE__);
+      ir_transmission();
     } else if (httpd_query_key_value(query_str, "temperature", buffer,
                                      BUFFER_SIZE) == ESP_OK) {
       response = set_ir_handle(CONF_AC_TEMPERATURE, atoi(buffer));
-      ir_send();
+      ESP_LOGI(TAG, "%d\n", __LINE__);
+      ir_transmission();
     } else if (httpd_query_key_value(query_str, "fan", buffer, BUFFER_SIZE) ==
                ESP_OK) {
       response = set_ir_handle(CONF_AC_FAN, atoi(buffer));
-      ir_send();
+      ESP_LOGI(TAG, "%d\n", __LINE__);
+      ir_transmission();
     } else if (httpd_query_key_value(query_str, "fan_speed", buffer,
                                      BUFFER_SIZE) == ESP_OK) {
       response = set_ir_handle(CONF_AC_FAN_SPEED, atoi(buffer));
-      ir_send();
+      ESP_LOGI(TAG, "%d\n", __LINE__);
+      ir_transmission();
     }
     if (httpd_query_key_value(query_str, "fan_direction", buffer,
                               BUFFER_SIZE) == ESP_OK) {
       response = set_ir_handle(CONF_AC_FAN_DIRECVTION, atoi(buffer));
-      ir_send();
+      ESP_LOGI(TAG, "%d\n", __LINE__);
+      ir_transmission();
     }
     if (httpd_query_key_value(query_str, "pin_ir_send", buffer, BUFFER_SIZE) ==
         ESP_OK) {
