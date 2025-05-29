@@ -21,6 +21,6 @@ int ir_transmission() {
   char protocol_name[32];
   snprintf(protocol_name, 32, "new_ac_%d", protocol);
   ESP_LOGI(TAG, "%d\n", __LINE__);
-  irbaby_send(protocol_name, &status);
+  irbaby_send(protocol_name, &status, pin);
   return 0;
 }

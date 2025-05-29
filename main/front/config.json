@@ -48,36 +48,36 @@
                                     "label": "松下"
                                 },
                                 {
-                                    "value": 86,
-                                    "label": "格兰仕"
-                                },
-                                {
                                     "value": 10,
                                     "label": "TCL"
+                                },
+                                {
+                                    "value": 86,
+                                    "label": "格兰仕"
                                 },
                                 {
                                     "value": 880,
                                     "label": "三星"
                                 },
                                 {
-                                    "value": 1911,
-                                    "label": "样例"
+                                    "value": 2,
+                                    "label": "长虹"
                                 },
                                 {
-                                    "value": 12,
-                                    "label": "澳柯玛"
-                                },
-                                {
-                                    "value": 8,
-                                    "label": "科龙"
+                                    "value": 3,
+                                    "label": "春兰"
                                 },
                                 {
                                     "value": 7,
                                     "label": "康佳"
                                 },
                                 {
-                                    "value": 3,
-                                    "label": "春兰"
+                                    "value": 8,
+                                    "label": "科龙"
+                                },
+                                {
+                                    "value": 12,
+                                    "label": "澳柯玛"
                                 },
                                 {
                                     "value": 881,
@@ -94,96 +94,12 @@
                                 {
                                     "value": 884,
                                     "label": "夏普"
-                                },
-                                {
-                                    "value": 888,
-                                    "label": "熊猫"
-                                },
-                                {
-                                    "value": 887,
-                                    "label": "伊莱克斯"
-                                },
-                                {
-                                    "value": 12,
-                                    "label": "澳柯玛"
                                 },
                                 {
                                     "value": 885,
                                     "label": "三菱"
                                 },
                                 {
-                                    "value": 884,
-                                    "label": "夏普"
-                                },
-                                {
-                                    "value": 883,
-                                    "label": "飞利浦"
-                                },
-                                {
-                                    "value": 882,
-                                    "label": "LG 乐金"
-                                },
-                                {
-                                    "value": 881,
-                                    "label": "东芝"
-                                },
-                                {
-                                    "value": 3,
-                                    "label": "春兰"
-                                },
-                                {
-                                    "value": 7,
-                                    "label": "康佳"
-                                },
-                                {
-                                    "value": 887,
-                                    "label": "伊莱克斯"
-                                },
-                                {
-                                    "value": 886,
-                                    "label": "双鹿"
-                                },
-                                {
-                                    "value": 884,
-                                    "label": "夏普"
-                                },
-                                {
-                                    "value": 883,
-                                    "label": "飞利浦"
-                                },
-                                {
-                                    "value": 882,
-                                    "label": "LG 乐金"
-                                },
-                                {
-                                    "value": 881,
-                                    "label": "东芝"
-                                },
-                                {
-                                    "value": 12,
-                                    "label": "澳柯玛"
-                                },
-                                {
-                                    "value": 8,
-                                    "label": "科龙"
-                                },
-                                {
-                                    "value": 7,
-                                    "label": "康佳"
-                                },
-                                {
-                                    "value": 3,
-                                    "label": "春兰"
-                                },
-                                {
-                                    "value": 884,
-                                    "label": "夏普"
-                                },
-                                {
-                                    "value": 896,
-                                    "label": "奥力"
-                                },
-                                {
                                     "value": 886,
                                     "label": "双鹿"
                                 },
@@ -194,26 +110,6 @@
                                 {
                                     "value": 888,
                                     "label": "熊猫"
-                                },
-                                {
-                                    "value": 889,
-                                    "label": "乐华"
-                                },
-                                {
-                                    "value": 891,
-                                    "label": "扬子"
-                                },
-                                {
-                                    "value": 892,
-                                    "label": "惠而浦"
-                                },
-                                {
-                                    "value": 893,
-                                    "label": "三洋"
-                                },
-                                {
-                                    "value": 894,
-                                    "label": "长岭"
                                 },
                                 {
                                     "value": 889,
@@ -240,26 +136,6 @@
                                     "label": "长岭"
                                 },
                                 {
-                                    "value": 896,
-                                    "label": "奥力"
-                                },
-                                {
-                                    "value": 897,
-                                    "label": "澳科"
-                                },
-                                {
-                                    "value": 898,
-                                    "label": "白雪"
-                                },
-                                {
-                                    "value": 899,
-                                    "label": "北京京电"
-                                },
-                                {
-                                    "value": 894,
-                                    "label": "长岭"
-                                },
-                                {
                                     "value": 895,
                                     "label": "开利"
                                 },
@@ -278,6 +154,10 @@
                                 {
                                     "value": 899,
                                     "label": "北京京电"
+                                },
+                                {
+                                    "value": 900,
+                                    "label": "波尔卡"
                                 },
                                 {
                                     "value": 901,
@@ -296,84 +176,200 @@
                                     "label": "富士通"
                                 },
                                 {
-                                    "value": 904,
-                                    "label": "富士通"
-                                },
-                                {
-                                    "value": 903,
-                                    "label": "飞鹿"
-                                },
-                                {
-                                    "value": 902,
-                                    "label": "飞歌"
-                                },
-                                {
-                                    "value": 911,
-                                    "label": "博世"
-                                },
-                                {
-                                    "value": 900,
-                                    "label": "波尔卡"
-                                },
-                                {
-                                    "value": 899,
-                                    "label": "北京京电"
-                                },
-                                {
-                                    "value": 898,
-                                    "label": "白雪"
-                                },
-                                {
-                                    "value": 897,
-                                    "label": "澳科"
-                                },
-                                {
-                                    "value": 896,
-                                    "label": "奥力"
-                                },
-                                {
-                                    "value": 895,
-                                    "label": "开利"
+                                    "value": 905,
+                                    "label": "东宝"
                                 },
                                 {
                                     "value": 906,
                                     "label": "彩星"
                                 },
                                 {
+                                    "value": 907,
+                                    "label": "长飞"
+                                },
+                                {
+                                    "value": 908,
+                                    "label": "长风"
+                                },
+                                {
+                                    "value": 909,
+                                    "label": "波乐"
+                                },
+                                {
+                                    "value": 910,
+                                    "label": "波士高"
+                                },
+                                {
+                                    "value": 911,
+                                    "label": "博世"
+                                },
+                                {
+                                    "value": 912,
+                                    "label": "创华"
+                                },
+                                {
+                                    "value": 913,
+                                    "label": "高路华"
+                                },
+                                {
+                                    "value": 914,
+                                    "label": "华宝"
+                                },
+                                {
+                                    "value": 915,
+                                    "label": "东元"
+                                },
+                                {
                                     "value": 916,
                                     "label": "日电"
                                 },
                                 {
-                                    "value": 904,
-                                    "label": "富士通"
+                                    "value": 917,
+                                    "label": "爱特"
                                 },
                                 {
-                                    "value": 903,
-                                    "label": "飞鹿"
+                                    "value": 918,
+                                    "label": "稻田"
                                 },
                                 {
-                                    "value": 902,
-                                    "label": "飞歌"
+                                    "value": 919,
+                                    "label": "金星"
                                 },
                                 {
-                                    "value": 901,
-                                    "label": "大宇"
+                                    "value": 920,
+                                    "label": "迪帕尔"
                                 },
                                 {
-                                    "value": 900,
-                                    "label": "波尔卡"
+                                    "value": 921,
+                                    "label": "东澳"
                                 },
                                 {
-                                    "value": 899,
-                                    "label": "北京京电"
+                                    "value": 922,
+                                    "label": "冬夏"
                                 },
                                 {
-                                    "value": 898,
-                                    "label": "白雪"
+                                    "value": 923,
+                                    "label": "先科"
                                 },
                                 {
-                                    "value": 897,
-                                    "label": "澳科"
+                                    "value": 924,
+                                    "label": "东新宝"
+                                },
+                                {
+                                    "value": 925,
+                                    "label": "盾安"
+                                },
+                                {
+                                    "value": 926,
+                                    "label": "法兰宝"
+                                },
+                                {
+                                    "value": 927,
+                                    "label": "格尔"
+                                },
+                                {
+                                    "value": 928,
+                                    "label": "内田"
+                                },
+                                {
+                                    "value": 929,
+                                    "label": "大金星"
+                                },
+                                {
+                                    "value": 930,
+                                    "label": "格阳"
+                                },
+                                {
+                                    "value": 931,
+                                    "label": "光大"
+                                },
+                                {
+                                    "value": 932,
+                                    "label": "古桥"
+                                },
+                                {
+                                    "value": 933,
+                                    "label": "华高"
+                                },
+                                {
+                                    "value": 934,
+                                    "label": "华科"
+                                },
+                                {
+                                    "value": 935,
+                                    "label": "华美"
+                                },
+                                {
+                                    "value": 936,
+                                    "label": "黄河"
+                                },
+                                {
+                                    "value": 937,
+                                    "label": "汇丰"
+                                },
+                                {
+                                    "value": 938,
+                                    "label": "迎燕"
+                                },
+                                {
+                                    "value": 939,
+                                    "label": "佳乐"
+                                },
+                                {
+                                    "value": 940,
+                                    "label": "江成"
+                                },
+                                {
+                                    "value": 941,
+                                    "label": "杰士达"
+                                },
+                                {
+                                    "value": 942,
+                                    "label": "金北京"
+                                },
+                                {
+                                    "value": 943,
+                                    "label": "金鹿"
+                                },
+                                {
+                                    "value": 944,
+                                    "label": "金松"
+                                },
+                                {
+                                    "value": 945,
+                                    "label": "吉川"
+                                },
+                                {
+                                    "value": 946,
+                                    "label": "康丽"
+                                },
+                                {
+                                    "value": 947,
+                                    "label": "科尔"
+                                },
+                                {
+                                    "value": 948,
+                                    "label": "科明"
+                                },
+                                {
+                                    "value": 949,
+                                    "label": "麦克维"
+                                },
+                                {
+                                    "value": 950,
+                                    "label": "朗歌"
+                                },
+                                {
+                                    "value": 951,
+                                    "label": "美典"
+                                },
+                                {
+                                    "value": 952,
+                                    "label": "美灵"
+                                },
+                                {
+                                    "value": 953,
+                                    "label": "名亿"
                                 },
                                 {
                                     "value": 954,
@@ -693,7 +689,7 @@
                                 },
                                 {
                                     "value": 1478,
-                                    "label": "Videocon"
+                                    "label": "Vvalueeocon"
                                 },
                                 {
                                     "value": 1504,
@@ -1205,24 +1201,56 @@
                             "key": "pin_ir_send",
                             "options": [
                                 {
-                                    "label": "D1 (GPIO5)",
-                                    "value": "5"
+                                    "label": "GPIO2",
+                                    "value": "2"
                                 },
                                 {
-                                    "label": "D2 (GPIO4)",
+                                    "label": "GPIO3",
+                                    "value": "3"
+                                },
+                                {
+                                    "label": "GPIO4",
                                     "value": "4"
                                 },
                                 {
-                                    "label": "D5 (GPIO14)",
-                                    "value": "14"
+                                    "label": "GPIO5",
+                                    "value": "5"
                                 },
                                 {
-                                    "label": "D6 (GPIO12)",
+                                    "label": "GPIO6",
+                                    "value": "6"
+                                },
+                                {
+                                    "label": "GPIO7",
+                                    "value": "7"
+                                },
+                                {
+                                    "label": "GPIO8",
+                                    "value": "8"
+                                },
+                                {
+                                    "label": "GPIO10",
+                                    "value": "10"
+                                },
+                                {
+                                    "label": "GPIO11",
+                                    "value": "11"
+                                },
+                                {
+                                    "label": "GPIO12",
                                     "value": "12"
                                 },
                                 {
-                                    "label": "D7 (GPIO13)",
+                                    "label": "GPIO13",
                                     "value": "13"
+                                },
+                                {
+                                    "label": "GPIO20",
+                                    "value": "20"
+                                },
+                                {
+                                    "label": "GPIO21",
+                                    "value": "21"
                                 }
                             ]
                         },

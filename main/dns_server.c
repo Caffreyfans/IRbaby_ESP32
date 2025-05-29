@@ -32,8 +32,6 @@ Contains the freeRTOS task for the DNS server that processes the requests.
 */
 
 #include "dns_server.h"
-
-#include <byteswap.h>
 #include <esp_err.h>
 #include <esp_event.h>
 #include <esp_log.h>
@@ -50,7 +48,7 @@ Contains the freeRTOS task for the DNS server that processes the requests.
 #include <nvs_flash.h>
 #include <stdint.h>
 #include <string.h>
-
+#include "endian.h"
 #include "wifimanager.h"
 
 static const char TAG[] = "dns_server";
@@ -162,17 +160,16 @@ void dns_server(void *pvParameters) {
 
       /* create DNS answer at the end of the query*/
       dns_answer_t *dns_answer = (dns_answer_t *)&response[length];
-      dns_answer->NAME = __bswap_16(
-          0xC00C); /* This is a pointer to the beginning of the question. As per
+      dns_answer->NAME = htole16(0xC00C); /* This is a pointer to the beginning of the question. As per
                       DNS standard, first two bits must be set to 11 for some
                       odd reason hence 0xC0 */
-      dns_answer->TYPE = __bswap_16(DNS_ANSWER_TYPE_A);
-      dns_answer->CLASS = __bswap_16(DNS_ANSWER_CLASS_IN);
+      dns_answer->TYPE = htole16(DNS_ANSWER_TYPE_A);
+      dns_answer->CLASS = htole16(DNS_ANSWER_CLASS_IN);
       dns_answer->TTL =
           (uint32_t)0x00000000; /* no caching. Avoids DNS poisoning since this
                                    is a DNS hijack */
       dns_answer->RDLENGTH =
-          __bswap_16(0x0004); /* 4 byte => size of an ipv4 address */
+          htole16(0x0004); /* 4 byte => size of an ipv4 address */
       dns_answer->RDATA = ip_resolved.addr;
 
       err = sendto(socket_fd, response, length + sizeof(dns_answer_t), 0,

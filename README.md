@@ -1,1 +1,1 @@
-- [x] fix esp32c3 open file in spiffs
+ESP32-C6 基于 esp-idf-v5.4.1 适配菜

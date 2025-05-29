@@ -21,7 +21,7 @@ set(includes "IRbaby_SDK/3rdparty/coreHTTP/coreHTTP/source/dependency/3rdparty/h
              "IRbaby_SDK/include/port")
 idf_component_register(SRCS ${irext_srcs} ${srcs}
                        INCLUDE_DIRS ${includes}
-                       REQUIRES lwip freertos)
+                       REQUIRES lwip freertos driver esp_timer)
 
 target_compile_definitions(${COMPONENT_LIB} PUBLIC -DHTTP_DO_NOT_USE_CUSTOM_CONFIG=1 -DESP32)
 target_compile_options(${COMPONENT_LIB} PUBLIC -Wno-stringop-truncation)
