@@ -1,1 +1,1 @@
-ESP32-C6 基于 esp-idf-v5.4.1 适配菜
+ESP32-C6 基于 esp-idf-v5.4.1 适配
