@@ -43,4 +43,6 @@ typedef enum {
 void irbaby_set_conf(conf_type type, ac_ops key, int value);
 property_t *irbaby_get_conf(conf_type type);
 int irbaby_get_conf_num(conf_type type);
+void irbaby_store_conf();
+void irbaby_load_conf();
 #endif  // CONF_H_

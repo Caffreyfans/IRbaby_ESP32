@@ -17,10 +17,16 @@
 #include "wifimanager.h"
 #include "esp_mac.h"
 #include "esp_spi_flash.h"
-#include "esp32c6/rom/ets_sys.h"
 #include "esp_psram.h"
 #include "esp_flash.h"
 #include "esp_log.h"
+#include "peripherals.h"
+#ifdef CONFIG_IDF_TARGET_ESP32
+#include "esp32/rom/ets_sys.h"
+#endif
+#ifdef CONFIG_IDF_TARGET_ESP32C6
+#include "esp32c6/rom/ets_sys.h"
+#endif
 #define SCAN_LIST_SIZE 10
 
 #define TAG "handler.c"
@@ -269,5 +275,9 @@ char *set_ir_handle(ac_ops ops, int value)
 char *set_gpio_handle(pin_ops ops, int value)
 {
   irbaby_set_conf(CONF_PIN, ops, value);
+  property_t *ac_pin = irbaby_get_conf(CONF_PIN);
+  int tx_pin = ac_pin[CONF_PIN_IR_SEND].value;
+  int rx_pin = ac_pin[CONF_PIN_IR_RECV].value;
+  ir_init(tx_pin, rx_pin);
   return get_gpio_handle();
 }

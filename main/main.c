@@ -27,6 +27,9 @@
 #include "nvs_flash.h"
 #include "wifimanager.h"
 #include "web.h"
+#include "conf.h"
+#include "peripherals.h"
+#include "conf.h"
 static const char *TAG = "IRbaby";
 
 void app_main(void)
@@ -83,6 +86,11 @@ void app_main(void)
   {
     ESP_LOGI(TAG, "Partition size: total: %d, used: %d", total, used);
   }
+  irbaby_load_conf();
+  property_t *ac_pin = irbaby_get_conf(CONF_PIN);
+  int tx_pin = ac_pin[CONF_PIN_IR_SEND].value;
+  int rx_pin = ac_pin[CONF_PIN_IR_RECV].value;
+  ir_init(tx_pin, rx_pin);
   wifi_init();
   start_webserver();
 }

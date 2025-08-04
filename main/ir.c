@@ -4,7 +4,8 @@
 #include "esp_log.h"
 static const char *TAG = "IR";
 
-int ir_transmission() {
+int ir_transmission()
+{
   property_t *ac_conf = irbaby_get_conf(CONF_AC);
   property_t *ac_pin = irbaby_get_conf(CONF_PIN);
   int protocol = ac_conf[CONF_AC_PROTOCOL].value;
