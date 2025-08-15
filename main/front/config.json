@@ -1021,6 +1021,7 @@
                             "render": "switch",
                             "label": "开关 Power",
                             "key": "power",
+                            "timeout": "1000",
                             "path": ""
                         },
                         {

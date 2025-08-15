@@ -21,7 +21,6 @@ int ir_transmission()
       .ac_wind_speed = ac_conf[CONF_AC_FAN_SPEED].value};
   char protocol_name[32];
   snprintf(protocol_name, 32, "new_ac_%d", protocol);
-  ESP_LOGI(TAG, "%d\n", __LINE__);
   irbaby_send(protocol_name, &status, pin);
   return 0;
 }
