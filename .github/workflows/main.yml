@@ -32,7 +32,7 @@ jobs:
       - name: Init & Update Submodules
         shell: bash
         run: |
-          git submodule update --init --recursive --depth 1
+          git submodule update --init --recursive
 
       # 5️⃣ 构建固件
       - name: Build firmware (${{ matrix.target }})
