@@ -9,28 +9,34 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: espressif/idf:release-v5.4   # 官方 Docker 镜像
+      image: espressif/idf:release-v5.4   # 使用 v5.4 官方 Docker 镜像
 
     strategy:
       matrix:
-        target: [esp32, esp32c6]
+        target: [esp32, esp32c6]   # 只编译 ESP32 和 ESP32-C6
 
     steps:
-      # 1️⃣ Checkout 仓库 + 子模块（浅 clone + 并行 fetch）
-      - name: Checkout repository with submodules
+      # 1️⃣ Checkout 仓库，不递归子模块
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          submodules: recursive
-          fetch-depth: 3  # 仓库浅 clone，加快速度
+          submodules: false
+          fetch-depth: 3
 
-      # 2️⃣ Build firmware
+      # 3️⃣ Build firmware
       - name: Build firmware (${{ matrix.target }})
+        shell: bash
         run: |
+          # export.sh 路径在 Docker 镜像中通常在 /opt/esp/idf
+          if [ ! -f /opt/esp/idf/export.sh ]; then
+            echo "export.sh not found at /opt/esp/idf"
+            exit 1
+          fi
           source /opt/esp/idf/export.sh
           idf.py set-target ${{ matrix.target }}
           idf.py build
 
-      # 3️⃣ Upload build artifacts
+      # 4️⃣ 上传构建产物
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
