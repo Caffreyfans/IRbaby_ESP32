@@ -1,4 +1,4 @@
-name: Build & Release ESP-IDF Firmware
+name: Build & Release IRbaby Firmware
 
 on:
   push:
