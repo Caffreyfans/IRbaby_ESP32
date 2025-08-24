@@ -46,7 +46,7 @@ jobs:
           files: build/merged-binary.bin   # 上传的产物，可以写多个，用逗号隔开
           generate_release_notes: true   # 自动生成 release notes
         env:
-          GITHUB_TOKEN: ${{ secrets.REPO_PAT }}   # 默认 token 就行
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}   # 默认 token 就行
 
       # 7️⃣ 上传 merged-binary.bin 到 Release
       - name: Upload firmware to Release
