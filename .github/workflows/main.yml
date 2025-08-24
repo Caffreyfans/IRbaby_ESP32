@@ -37,7 +37,7 @@ jobs:
           idf.py set-target ${{ matrix.target }}
           idf.py build
           idf.py merge-bin
-          cp build/merged-binary.bin build/${{ matrix.target }}-firmware.bin
+          cp build/merged-binary.bin build/${{ matrix.target }}.bin
 
       # 6️⃣ 创建 GitHub Release（使用 PAT 避免权限问题）
       # 🔑 使用 softprops/action-gh-release 来创建 Release 并上传产物
