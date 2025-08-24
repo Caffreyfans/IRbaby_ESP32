@@ -1,22 +1,23 @@
-name: Build ESP-IDF Project
+name: Build ESP-IDF Firmware
 
 on:
   push:
     tags:
-      - "v*"   # 匹配 v1.0.0 这种 tag，按需修改
+      - "v*"   # 例如 v1.0.0，只有打 tag 才触发
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target: [esp32, esp32c6]   # 一次性编译多个芯片固件
 
     steps:
-      # 拉取代码
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          submodules: true   # 如果你的项目依赖子模块（比如 ESP-IDF 组件）
+          submodules: true
 
-      # 安装依赖
       - name: Install dependencies
         run: |
           sudo apt-get update
@@ -24,30 +25,19 @@ jobs:
           pip3 install setuptools wheel
           pip3 install --upgrade pip
 
-      # 安装 ESP-IDF
       - name: Setup ESP-IDF
         run: |
-          git clone --recursive https://github.com/espressif/esp-idf.git $HOME/esp-idf
-          cd $HOME/esp-idf
-          ./install.sh
-          . ./export.sh
-          echo "source $HOME/esp-idf/export.sh" >> $GITHUB_ENV
+          git clone --branch release/v5.1 --recursive https://github.com/espressif/esp-idf.git $HOME/esp-idf
+          $HOME/esp-idf/install.sh
 
-      # 编译
-      - name: Build firmware
+      - name: Build firmware (${{ matrix.target }})
         run: |
           source $HOME/esp-idf/export.sh
+          idf.py set-target ${{ matrix.target }}
           idf.py build
 
-      # 打包产物
-      - name: Archive firmware
-        run: |
-          tar czvf firmware-${GITHUB_REF_NAME}.tar.gz build/
-
-      # 上传构建产物到 GitHub Release
-      - name: Upload Release Asset
-        uses: softprops/action-gh-release@v1
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
         with:
-          files: firmware-${{ github.ref_name }}.tar.gz
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          name: firmware-${{ matrix.target }}-${{ github.ref_name }}
+          path: build/
