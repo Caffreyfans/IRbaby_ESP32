@@ -39,16 +39,14 @@ jobs:
           idf.py merge-bin
 
       # 6️⃣ 创建 GitHub Release（使用 PAT 避免权限问题）
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
+      # 🔑 使用 softprops/action-gh-release 来创建 Release 并上传产物
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ github.ref_name }}
-          release_name: Release ${{ github.ref_name }}
-          draft: false
-          prerelease: false
+          files: build/merged-binary.bin   # 上传的产物，可以写多个，用逗号隔开
+          generate_release_notes: true   # 自动生成 release notes
         env:
-          GITHUB_TOKEN: ${{ secrets.REPO_PAT }}
+          GITHUB_TOKEN: ${{ secrets.REPO_PAT }}   # 默认 token 就行
 
       # 7️⃣ 上传 merged-binary.bin 到 Release
       - name: Upload firmware to Release
