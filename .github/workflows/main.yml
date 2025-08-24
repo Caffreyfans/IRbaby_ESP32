@@ -21,12 +21,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
-          fetch-depth: 1  # 仓库浅 clone，加快速度
-
-      - name: Shallow update all submodules in parallel
-        run: |
-          git config --global submodule.fetchJobs 8
-          git submodule update --init --recursive --depth 1
+          fetch-depth: 3  # 仓库浅 clone，加快速度
 
       # 2️⃣ Build firmware
       - name: Build firmware (${{ matrix.target }})
