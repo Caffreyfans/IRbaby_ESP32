@@ -3,31 +3,39 @@ name: Build ESP-IDF Firmware
 on:
   push:
     tags:
-      - "v*"   # 例如 v1.0.0，只有 push tag 才触发
+      - "v*"   # 例如 v1.0.0
 
 jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: espressif/idf:release-v5.4   # 官方 Docker 镜像，已经预装工具链和 ESP-IDF
+      image: espressif/idf:release-v5.4   # 官方 Docker 镜像
 
     strategy:
       matrix:
-        target: [esp32, esp32s3, esp32c6]   # 支持多芯片并行编译
+        target: [esp32, esp32c6]
 
     steps:
-      - name: Checkout code
+      # 1️⃣ Checkout 仓库 + 子模块（浅 clone + 并行 fetch）
+      - name: Checkout repository with submodules
         uses: actions/checkout@v4
         with:
           submodules: recursive
+          fetch-depth: 1  # 仓库浅 clone，加快速度
 
+      - name: Shallow update all submodules in parallel
+        run: |
+          git config --global submodule.fetchJobs 8
+          git submodule update --init --recursive --depth 1
+
+      # 2️⃣ Build firmware
       - name: Build firmware (${{ matrix.target }})
         run: |
-          # Docker 镜像里 ESP-IDF 已经安装好
           source /opt/esp/idf/export.sh
           idf.py set-target ${{ matrix.target }}
           idf.py build
 
+      # 3️⃣ Upload build artifacts
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
