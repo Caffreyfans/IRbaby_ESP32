@@ -1,0 +1,53 @@
+name: Build ESP-IDF Project
+
+on:
+  push:
+    tags:
+      - "v*"   # 匹配 v1.0.0 这种 tag，按需修改
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 拉取代码
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: true   # 如果你的项目依赖子模块（比如 ESP-IDF 组件）
+
+      # 安装依赖
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git wget flex bison gperf python3 python3-pip cmake ninja-build ccache libffi-dev libssl-dev dfu-util
+          pip3 install setuptools wheel
+          pip3 install --upgrade pip
+
+      # 安装 ESP-IDF
+      - name: Setup ESP-IDF
+        run: |
+          git clone --recursive https://github.com/espressif/esp-idf.git $HOME/esp-idf
+          cd $HOME/esp-idf
+          ./install.sh
+          . ./export.sh
+          echo "source $HOME/esp-idf/export.sh" >> $GITHUB_ENV
+
+      # 编译
+      - name: Build firmware
+        run: |
+          source $HOME/esp-idf/export.sh
+          idf.py build
+
+      # 打包产物
+      - name: Archive firmware
+        run: |
+          tar czvf firmware-${GITHUB_REF_NAME}.tar.gz build/
+
+      # 上传构建产物到 GitHub Release
+      - name: Upload Release Asset
+        uses: softprops/action-gh-release@v1
+        with:
+          files: firmware-${{ github.ref_name }}.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
