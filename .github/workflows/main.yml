@@ -20,7 +20,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          submodules: false
+          submodules: true
           fetch-depth: 3
       
       # 2️⃣ 路径添加
