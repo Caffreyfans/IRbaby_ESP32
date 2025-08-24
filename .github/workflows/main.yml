@@ -20,12 +20,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          submodules: true
-          fetch-depth: 3
+          submodules: false
+          fetch-depth: 1
       
       # 2️⃣ 路径添加
       - name: Configure Git safe directory
-        run: git config --global --add safe.directory /__w/IRbaby_ESP32/IRbaby_ESP32
+        run: |
+          git config --global --add safe.directory /__w/IRbaby_ESP32/IRbaby_ESP32
+          git submodule update --init --recursive --depth 1
 
       # 3️⃣ Build firmware
       - name: Build firmware (${{ matrix.target }})
