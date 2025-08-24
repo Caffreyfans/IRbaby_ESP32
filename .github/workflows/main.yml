@@ -3,14 +3,17 @@ name: Build ESP-IDF Firmware
 on:
   push:
     tags:
-      - "v*"   # 例如 v1.0.0，只有打 tag 才触发
+      - "v*"   # 例如 v1.0.0，只有 push tag 才触发
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    container:
+      image: espressif/idf:release-v5.4   # 官方 Docker 镜像，已经预装工具链和 ESP-IDF
+
     strategy:
       matrix:
-        target: [esp32, esp32c6]   # 一次性编译多个芯片固件
+        target: [esp32, esp32s3, esp32c6]   # 支持多芯片并行编译
 
     steps:
       - name: Checkout code
@@ -18,21 +21,10 @@ jobs:
         with:
           submodules: true
 
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y git wget flex bison gperf python3 python3-pip cmake ninja-build ccache libffi-dev libssl-dev dfu-util
-          pip3 install setuptools wheel
-          pip3 install --upgrade pip
-
-      - name: Setup ESP-IDF
-        run: |
-          git clone --branch release/v5.1 --recursive https://github.com/espressif/esp-idf.git $HOME/esp-idf
-          $HOME/esp-idf/install.sh
-
       - name: Build firmware (${{ matrix.target }})
         run: |
-          source $HOME/esp-idf/export.sh
+          # Docker 镜像里 ESP-IDF 已经安装好
+          source /opt/esp/idf/export.sh
           idf.py set-target ${{ matrix.target }}
           idf.py build
 
