@@ -2,20 +2,65 @@
 #include "string.h"
 #include <stdio.h>
 #include "storage.h"
+#include "esp_log.h"
 
-property_t ac_conf[] = {
-    // {.key = "brand", .value = 4}, {.key = "protocol", .value = 2582}, {.key = "power", .value = 1}, {.key = "mode", .value = 1}, {.key = "temperature", .value = 26}, {.key = "fan", .value = 1}, {.key = "fan_speed", .value = 1}, {.key = "fan_direction", .value = 0}, {.key = "display", .value = 1}, {.key = "sleep", .value = 0}, {.key = "timer", .value = 0}};
-    {.key = "brand", .value = 4}, {.key = "protocol", .value = 2582}, {.key = "power", .value = 1}, {.key = "mode", .value = 1}, {.key = "temperature", .value = 26}, {.key = "fan", .value = 1}, {.key = "fan_speed", .value = 1}, {.key = "fan_direction", .value = 0}};
+#define TAG "conf"
 
-property_t pin_conf[] = {
-    {.key = "pin_ir_send", .value = 4},
-    {.key = "pin_ir_recv", .value = 19},
-    {.key = "pin_led", .value = 2},
-    {.key = "pin_button", .value = 0},
-
+char *ac_conf_label[CONF_AC_MAX] = {
+    "brand",
+    "protocol",
+    "power",
+    "mode",
+    "temperature",
+    "fan",
+    "fan_speed",
+    "fan_direction",
+    "display",
+    "sleep",
+    "timer",
 };
 
-void irbaby_set_conf(conf_type type, ac_ops key, int value)
+char *pin_conf_label[CONF_PIN_MAX] = {
+    "pin_ir_send",
+    "pin_ir_recv",
+    "pin_led",
+    "pin_button",
+};
+
+property_t ac_conf[CONF_AC_MAX] = {
+    {.key = CONF_AC_BRAND, .value = 4},
+    {.key = CONF_AC_PROTOCOL, .value = 2582},
+    {.key = CONF_AC_POWER, .value = 0},
+    {.key = CONF_AC_MODE, .value = 1},
+    {.key = CONF_AC_TEMPERATURE, .value = 0},
+    {.key = CONF_AC_FAN, .value = 1},
+    {.key = CONF_AC_FAN_SPEED, .value = 1},
+    {.key = CONF_AC_FAN_DIRECVTION, .value = 1},
+    {.key = CONF_AC_DISPLAY, .value = 0},
+    {.key = CONF_AC_SLEEP, .value = 0},
+    {.key = CONF_AC_TIMER, .value = 0}};
+
+property_t pin_conf[CONF_PIN_MAX] = {
+    {.key = CONF_PIN_IR_SEND, .value = 4},
+    {.key = CONF_PIN_IR_RECV, .value = 19},
+    {.key = CONF_PIN_LED, .value = 2},
+    {.key = CONF_PIN_BUTTON, .value = 0},
+};
+
+char *irbaby_get_conf_label(conf_type type, int key)
+{
+  if (type == CONF_AC)
+  {
+    return ac_conf_label[key];
+  }
+  else if (type == CONF_PIN)
+  {
+    return pin_conf_label[key];
+  }
+  return NULL;
+}
+
+void irbaby_set_conf(conf_type type, int key, int value)
 {
   switch (type)
   {
@@ -71,8 +116,19 @@ void irbaby_store_conf()
 
 void irbaby_load_conf()
 {
-  uint8_t buffer[128];
+  uint8_t buffer[256];
   int len = 0;
+  for (int i = 0; i < CONF_AC_MAX; i++)
+  {
+    ac_conf[i].label = ac_conf_label[i];
+    ESP_LOGI(TAG, "%d, %s", i, ac_conf[i].label);
+  }
+  for (int i = 0; i < CONF_PIN_MAX; i++)
+  {
+    pin_conf[i].label = pin_conf_label[i];
+    ESP_LOGI(TAG, "%d, %s", i, pin_conf[i].label);
+  }
+
   len = irbaby_read("ac_config", (uint8_t *)buffer, sizeof(buffer));
   if (len == sizeof(ac_conf))
   {

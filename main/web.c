@@ -63,72 +63,96 @@ static esp_err_t index_handler(httpd_req_t *req)
     if (httpd_query_key_value(query_str, "brand", buffer, BUFFER_SIZE) ==
         ESP_OK)
     {
-      response = set_ir_handle(CONF_AC_BRAND, (atoi(buffer)));
+
+      response = set_ir_handle(SET_AC_BRAND, (atoi(buffer)));
     }
     else if (httpd_query_key_value(query_str, "protocol", buffer,
                                    BUFFER_SIZE) == ESP_OK)
     {
-      response = set_ir_handle(CONF_AC_PROTOCOL, atoi(buffer));
+
+      response = set_ir_handle(SET_AC_PROTOCOL, atoi(buffer));
     }
     else if (httpd_query_key_value(query_str, "power", buffer, BUFFER_SIZE) ==
              ESP_OK)
     {
-      response = set_ir_handle(CONF_AC_POWER, atoi(buffer));
-      ir_transmission();
+
+      response = set_ir_handle(SET_AC_POWER, atoi(buffer));
+      ir_transmission(IR_SEND_DECODE);
     }
     else if (httpd_query_key_value(query_str, "mode", buffer, BUFFER_SIZE) ==
              ESP_OK)
     {
-      response = set_ir_handle(CONF_AC_MODE, atoi(buffer));
 
-      ir_transmission();
+      response = set_ir_handle(SET_AC_MODE, atoi(buffer));
+
+      ir_transmission(IR_SEND_DECODE);
     }
     else if (httpd_query_key_value(query_str, "temperature", buffer,
                                    BUFFER_SIZE) == ESP_OK)
     {
-      response = set_ir_handle(CONF_AC_TEMPERATURE, atoi(buffer));
 
-      ir_transmission();
+      response = set_ir_handle(SET_AC_TEMPERATURE, atoi(buffer));
+
+      ir_transmission(IR_SEND_DECODE);
     }
     else if (httpd_query_key_value(query_str, "fan", buffer, BUFFER_SIZE) ==
              ESP_OK)
     {
-      response = set_ir_handle(CONF_AC_FAN, atoi(buffer));
 
-      ir_transmission();
+      response = set_ir_handle(SET_AC_FAN, atoi(buffer));
+
+      ir_transmission(IR_SEND_DECODE);
     }
     else if (httpd_query_key_value(query_str, "fan_speed", buffer,
                                    BUFFER_SIZE) == ESP_OK)
     {
-      response = set_ir_handle(CONF_AC_FAN_SPEED, atoi(buffer));
 
-      ir_transmission();
-    }
-    if (httpd_query_key_value(query_str, "fan_direction", buffer,
-                              BUFFER_SIZE) == ESP_OK)
-    {
-      response = set_ir_handle(CONF_AC_FAN_DIRECVTION, atoi(buffer));
+      response = set_ir_handle(SET_AC_FAN_SPEED, atoi(buffer));
 
-      ir_transmission();
+      ir_transmission(IR_SEND_DECODE);
     }
-    if (httpd_query_key_value(query_str, "pin_ir_send", buffer, BUFFER_SIZE) ==
-        ESP_OK)
+    else if (httpd_query_key_value(query_str, "fan_direction", buffer,
+                                   BUFFER_SIZE) == ESP_OK)
     {
+
+      response = set_ir_handle(SET_AC_FAN_DIRECVTION, atoi(buffer));
+
+      ir_transmission(IR_SEND_DECODE);
+    }
+    else if (httpd_query_key_value(query_str, "ir_receive_enable", buffer, BUFFER_SIZE) ==
+             ESP_OK)
+    {
+
+      response = set_ir_handle(SET_IR_RECEIVE_ENABLE, atoi(buffer));
+    }
+    else if (httpd_query_key_value(query_str, "ir_send_incoming", buffer, BUFFER_SIZE) ==
+             ESP_OK)
+    {
+
+      ir_transmission(IR_SEND_INCOMING);
+    }
+    else if (httpd_query_key_value(query_str, "pin_ir_send", buffer, BUFFER_SIZE) ==
+             ESP_OK)
+    {
+
       response = set_gpio_handle(CONF_PIN_IR_SEND, atoi(buffer));
     }
-    if (httpd_query_key_value(query_str, "pin_ir_recv", buffer, BUFFER_SIZE) ==
-        ESP_OK)
+    else if (httpd_query_key_value(query_str, "pin_ir_recv", buffer, BUFFER_SIZE) ==
+             ESP_OK)
     {
+
       response = set_gpio_handle(CONF_PIN_IR_RECV, atoi(buffer));
     }
-    if (httpd_query_key_value(query_str, "pin_led", buffer, BUFFER_SIZE) ==
-        ESP_OK)
+    else if (httpd_query_key_value(query_str, "pin_led", buffer, BUFFER_SIZE) ==
+             ESP_OK)
     {
+
       response = set_gpio_handle(CONF_PIN_LED, atoi(buffer));
     }
-    if (httpd_query_key_value(query_str, "pin_button", buffer, BUFFER_SIZE) ==
-        ESP_OK)
+    else if (httpd_query_key_value(query_str, "pin_button", buffer, BUFFER_SIZE) ==
+             ESP_OK)
     {
+
       response = set_gpio_handle(CONF_PIN_BUTTON, atoi(buffer));
     }
   }

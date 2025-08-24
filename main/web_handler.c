@@ -45,7 +45,15 @@ static char *get_conf_handle(conf_type type)
   property_t *property = irbaby_get_conf(type);
   for (int i = 0; i < irbaby_get_conf_num(type); i++)
   {
-    cJSON_AddNumberToObject(root, property[i].key, property[i].value);
+    if (type == CONF_AC)
+    {
+
+      cJSON_AddNumberToObject(root, irbaby_get_conf_label(type, i), property[i].value);
+    }
+    else if (type == CONF_PIN)
+    {
+      cJSON_AddNumberToObject(root, irbaby_get_conf_label(type, i), property[i].value);
+    }
   }
   response = cJSON_Print(root);
   cJSON_Delete(root);
@@ -235,7 +243,7 @@ static char *get_protocol_handle(int brand_id)
     property_t *property = irbaby_get_conf(CONF_AC);
     for (int i = 0; i < irbaby_get_conf_num(CONF_AC); i++)
     {
-      cJSON_AddNumberToObject(root, property[i].key, property[i].value);
+      cJSON_AddNumberToObject(root, property[i].label, property[i].value);
     }
     response = cJSON_PrintUnformatted(root);
   }
@@ -257,12 +265,12 @@ char *get_more_handle()
   return response;
 }
 
-char *set_ir_handle(ac_ops ops, int value)
+char *set_ir_handle(ir_ops ops, int value)
 {
   irbaby_set_conf(CONF_AC, ops, value);
   switch (ops)
   {
-  case CONF_AC_BRAND:
+  case SET_AC_BRAND:
     return get_protocol_handle(value);
     break;
 

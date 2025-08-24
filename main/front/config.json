@@ -1021,7 +1021,7 @@
                             "render": "switch",
                             "label": "开关 Power",
                             "key": "power",
-                            "timeout": "1000",
+                            "timeout": "2000",
                             "path": ""
                         },
                         {
@@ -1031,16 +1031,24 @@
                             "path": "",
                             "options": [
                                 {
-                                    "label": "Auto",
+                                    "label": "Cool",
                                     "value": "0"
                                 },
                                 {
-                                    "label": "Cool",
+                                    "label": "Heat",
                                     "value": "1"
                                 },
                                 {
-                                    "label": "Heat",
+                                    "label": "Auto",
                                     "value": "2"
+                                },
+                                {
+                                    "label": "FAN",
+                                    "value": "3"
+                                },
+                                {
+                                    "label": "DRY",
+                                    "value": "4"
                                 }
                             ]
                         },
@@ -1052,63 +1060,63 @@
                             "options": [
                                 {
                                     "label": "16",
-                                    "value": "16"
+                                    "value": "0"
                                 },
                                 {
                                     "label": "17",
-                                    "value": "17"
+                                    "value": "1"
                                 },
                                 {
                                     "label": "18",
-                                    "value": "18"
+                                    "value": "2"
                                 },
                                 {
                                     "label": "19",
-                                    "value": "19"
+                                    "value": "3"
                                 },
                                 {
                                     "label": "20",
-                                    "value": "20"
+                                    "value": "4"
                                 },
                                 {
                                     "label": "21",
-                                    "value": "21"
+                                    "value": "5"
                                 },
                                 {
                                     "label": "22",
-                                    "value": "22"
+                                    "value": "6"
                                 },
                                 {
                                     "label": "23",
-                                    "value": "23"
+                                    "value": "7"
                                 },
                                 {
                                     "label": "24",
-                                    "value": "24"
+                                    "value": "8"
                                 },
                                 {
                                     "label": "25",
-                                    "value": "25"
+                                    "value": "9"
                                 },
                                 {
                                     "label": "26",
-                                    "value": "26"
+                                    "value": "10"
                                 },
                                 {
                                     "label": "27",
-                                    "value": "27"
+                                    "value": "11"
                                 },
                                 {
                                     "label": "28",
-                                    "value": "28"
+                                    "value": "12"
                                 },
                                 {
                                     "label": "29",
-                                    "value": "29"
+                                    "value": "13"
                                 },
                                 {
                                     "label": "30",
-                                    "value": "30"
+                                    "value": "14"
                                 }
                             ]
                         },
@@ -1139,24 +1147,16 @@
                                     "value": "0"
                                 },
                                 {
-                                    "label": "Min(1)",
+                                    "label": "Low(2)",
                                     "value": "1"
                                 },
                                 {
-                                    "label": "Low(2)",
+                                    "label": "Med(3)",
                                     "value": "2"
                                 },
                                 {
-                                    "label": "Med(3)",
-                                    "value": "3"
-                                },
-                                {
                                     "label": "High(4)",
-                                    "value": "4"
-                                },
-                                {
-                                    "label": "Max(5)",
-                                    "value": "5"
+                                    "value": "3"
                                 }
                             ]
                         },
@@ -1179,6 +1179,24 @@
                                     "value": 2
                                 }
                             ]
+                        }
+                    ]
+                },
+                {
+                    "render": "cells",
+                    "label": "红外接收",
+                    "cells": [
+                        {
+                            "render": "switch",
+                            "label": "接收开关",
+                            "key": "ir_receive_enable",
+                            "timeout": "1000"
+                        },
+                        {
+                            "render": "switch",
+                            "label": "发送接收",
+                            "key": "ir_send_incoming",
+                            "timeout": "100"
                         }
                     ]
                 },
@@ -1261,24 +1279,64 @@
                             "key": "pin_ir_recv",
                             "options": [
                                 {
-                                    "label": "D1 (GPIO5)",
-                                    "value": "5"
+                                    "label": "GPIO2",
+                                    "value": "2"
                                 },
                                 {
-                                    "label": "D2 (GPIO4)",
+                                    "label": "GPIO3",
+                                    "value": "3"
+                                },
+                                {
+                                    "label": "GPIO4",
                                     "value": "4"
                                 },
                                 {
-                                    "label": "D5 (GPIO14)",
-                                    "value": "14"
+                                    "label": "GPIO5",
+                                    "value": "5"
                                 },
                                 {
-                                    "label": "D6 (GPIO12)",
+                                    "label": "GPIO6",
+                                    "value": "6"
+                                },
+                                {
+                                    "label": "GPIO7",
+                                    "value": "7"
+                                },
+                                {
+                                    "label": "GPIO8",
+                                    "value": "8"
+                                },
+                                {
+                                    "label": "GPIO10",
+                                    "value": "10"
+                                },
+                                {
+                                    "label": "GPIO11",
+                                    "value": "11"
+                                },
+                                {
+                                    "label": "GPIO12",
                                     "value": "12"
                                 },
                                 {
-                                    "label": "D7 (GPIO13)",
+                                    "label": "GPIO13",
                                     "value": "13"
+                                },
+                                {
+                                    "label": "GPIO18",
+                                    "value": "18"
+                                },
+                                {
+                                    "label": "GPIO19",
+                                    "value": "19"
+                                },
+                                {
+                                    "label": "GPIO20",
+                                    "value": "20"
+                                },
+                                {
+                                    "label": "GPIO21",
+                                    "value": "21"
                                 }
                             ]
                         }

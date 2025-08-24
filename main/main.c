@@ -28,8 +28,8 @@
 #include "wifimanager.h"
 #include "web.h"
 #include "conf.h"
+#include "ir.h"
 #include "peripherals.h"
-#include "conf.h"
 static const char *TAG = "IRbaby";
 
 void app_main(void)
@@ -87,9 +87,9 @@ void app_main(void)
     ESP_LOGI(TAG, "Partition size: total: %d, used: %d", total, used);
   }
   irbaby_load_conf();
-  property_t *ac_pin = irbaby_get_conf(CONF_PIN);
-  int tx_pin = ac_pin[CONF_PIN_IR_SEND].value;
-  int rx_pin = ac_pin[CONF_PIN_IR_RECV].value;
+  property_t *pin_conf = irbaby_get_conf(CONF_PIN);
+  int tx_pin = pin_conf[CONF_PIN_IR_SEND].value;
+  int rx_pin = pin_conf[CONF_PIN_IR_RECV].value;
   ir_init(tx_pin, rx_pin);
   wifi_init();
   start_webserver();

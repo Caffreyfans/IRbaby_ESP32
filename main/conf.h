@@ -12,14 +12,23 @@
 #define CONF_H_
 #include <stdint.h>
 
-typedef struct {
-  char *key;
+typedef struct
+{
+  uint16_t key;
   uint16_t value;
+  char *label;
 } property_t;
 
-typedef enum { CONF_AC, CONF_PIN, CONFIG_INFO, CONFIG_MORE } conf_type;
+typedef enum
+{
+  CONF_AC,
+  CONF_PIN,
+  CONFIG_INFO,
+  CONFIG_MORE
+} conf_type;
 
-typedef enum {
+typedef enum
+{
   CONF_AC_BRAND,
   CONF_AC_PROTOCOL,
   CONF_AC_POWER,
@@ -31,18 +40,22 @@ typedef enum {
   CONF_AC_DISPLAY,
   CONF_AC_SLEEP,
   CONF_AC_TIMER,
+  CONF_AC_MAX,
 } ac_ops;
 
-typedef enum {
+typedef enum
+{
   CONF_PIN_IR_SEND,
   CONF_PIN_IR_RECV,
   CONF_PIN_LED,
-  CONF_PIN_BUTTON
+  CONF_PIN_BUTTON,
+  CONF_PIN_MAX,
 } pin_ops;
 
-void irbaby_set_conf(conf_type type, ac_ops key, int value);
+void irbaby_set_conf(conf_type type, int key, int value);
 property_t *irbaby_get_conf(conf_type type);
 int irbaby_get_conf_num(conf_type type);
 void irbaby_store_conf();
 void irbaby_load_conf();
-#endif  // CONF_H_
+char* irbaby_get_conf_label(conf_type type, int key);
+#endif // CONF_H_

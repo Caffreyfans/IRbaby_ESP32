@@ -2,6 +2,9 @@
     "files.associations": {
         "peripherals.h": "c",
         "irbaby.h": "c",
-        "types.h": "c"
+        "types.h": "c",
+        "irext_api.h": "c",
+        "storage.h": "c",
+        "web_handler.h": "c"
     }
 }
