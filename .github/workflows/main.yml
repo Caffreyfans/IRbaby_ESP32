@@ -22,6 +22,10 @@ jobs:
         with:
           submodules: false
           fetch-depth: 3
+      
+      # 2️⃣ 路径添加
+      - name: Configure Git safe directory
+        run: git config --global --add safe.directory /__w/IRbaby_ESP32/IRbaby_ESP32
 
       # 3️⃣ Build firmware
       - name: Build firmware (${{ matrix.target }})
