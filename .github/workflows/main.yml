@@ -13,7 +13,7 @@ jobs:
 
     strategy:
       matrix:
-        target: [esp32, esp32c6]   # 支持的目标芯片
+        target: [esp32, esp32c6, esp32s2, esp32c3, esp32s3, ]   # 支持的目标芯片
 
     steps:
       # 1️⃣ Checkout 仓库
