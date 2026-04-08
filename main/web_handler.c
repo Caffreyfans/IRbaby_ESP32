@@ -21,6 +21,14 @@
 #include "esp_flash.h"
 #include "esp_log.h"
 #include "peripherals.h"
+#include "esp_ota_ops.h"
+#include "ir.h"
+#include "mqtt.h"
+#include "homekit.h"
+#include <string.h>
+#include "esp_system.h"
+#include <dirent.h>
+#include <sys/stat.h>
 #ifdef CONFIG_IDF_TARGET_ESP32
 #include "esp32/rom/ets_sys.h"
 #endif
@@ -66,17 +74,24 @@ static char *get_conf_handle(conf_type type)
   cJSON *root = cJSON_CreateObject();
   if (root == NULL)
     return NULL;
-  property_t *property = irbaby_get_conf(type);
-  for (int i = 0; i < irbaby_get_conf_num(type); i++)
-  {
-    if (type == CONF_AC)
+  if (type == CONF_MQTT) {
+    string_property_t *property = irbaby_get_string_conf(type);
+    for (int i = 0; i < irbaby_get_conf_num(type); i++)
     {
-
-      cJSON_AddNumberToObject(root, irbaby_get_conf_label(type, i), property[i].value);
+      cJSON_AddStringToObject(root, irbaby_get_conf_label(type, i), property[i].value ? property[i].value : "");
     }
-    else if (type == CONF_PIN)
+  } else {
+    property_t *property = irbaby_get_conf(type);
+    for (int i = 0; i < irbaby_get_conf_num(type); i++)
     {
-      cJSON_AddNumberToObject(root, irbaby_get_conf_label(type, i), property[i].value);
+      if (type == CONF_AC)
+      {
+        cJSON_AddNumberToObject(root, irbaby_get_conf_label(type, i), property[i].value);
+      }
+      else if (type == CONF_PIN)
+      {
+        cJSON_AddNumberToObject(root, irbaby_get_conf_label(type, i), property[i].value);
+      }
     }
   }
   response = cJSON_Print(root);
@@ -278,13 +293,28 @@ char *get_ir_handle() { return get_conf_handle(CONF_AC); }
 
 char *get_gpio_handle() { return get_conf_handle(CONF_PIN); }
 
+char *get_mqtt_handle() { return get_conf_handle(CONF_MQTT); }
+
 char *get_more_handle()
 {
   char *response = NULL;
   cJSON *root = cJSON_CreateObject();
   if (root != NULL)
   {
+    const esp_partition_t *running = esp_ota_get_running_partition();
+    esp_ota_img_states_t ota_state;
+    if (esp_ota_get_state_partition(running, &ota_state) == ESP_OK) {
+      if (ota_state == ESP_OTA_IMG_PENDING_VERIFY) {
+        cJSON_AddStringToObject(root, "ota_status", "Pending verify");
+      } else {
+        cJSON_AddStringToObject(root, "ota_status", "Ready");
+      }
+    } else {
+      cJSON_AddStringToObject(root, "ota_status", "Unknown");
+    }
+    cJSON_AddStringToObject(root, "mqtt_status", mqtt_client ? "Connected" : "Disconnected");
     response = cJSON_PrintUnformatted(root);
+    cJSON_Delete(root);
   }
   return response;
 }
@@ -297,7 +327,14 @@ char *set_ir_handle(ir_ops ops, int value)
   case SET_AC_BRAND:
     return get_protocol_handle(value);
     break;
-
+  case SET_IR_RECEIVE_ENABLE:
+    if (value) {
+      ir_receive_start();
+    } else {
+      ir_receive_stop();
+    }
+    return get_ir_handle();
+    break;
   default:
     return get_ir_handle();
     break;
@@ -312,4 +349,128 @@ char *set_gpio_handle(pin_ops ops, int value)
   int rx_pin = ac_pin[CONF_PIN_IR_RECV].value;
   ir_init(tx_pin, rx_pin);
   return get_gpio_handle();
+}
+
+char *set_mqtt_handle(mqtt_ops ops, const char *value)
+{
+  irbaby_set_string_conf(CONF_MQTT, ops, value);
+  // Reinitialize MQTT with new config
+  mqtt_deinit();
+  string_property_t *mqtt_conf = irbaby_get_string_conf(CONF_MQTT);
+  if (strcmp(mqtt_conf[CONF_MQTT_ENABLE].value, "1") == 0) {
+    mqtt_init(mqtt_conf[CONF_MQTT_BROKER_URL].value,
+              atoi(mqtt_conf[CONF_MQTT_BROKER_PORT].value),
+              mqtt_conf[CONF_MQTT_USERNAME].value,
+              mqtt_conf[CONF_MQTT_PASSWORD].value,
+              mqtt_conf[CONF_MQTT_CLIENT_ID].value,
+              mqtt_conf[CONF_MQTT_TOPIC_PREFIX].value);
+  }
+  return get_mqtt_handle();
+}
+
+extern char *ota_update_handle(const char *url);
+
+char *reboot_handle()
+{
+  // Schedule a reboot after a short delay to allow response to be sent
+  vTaskDelay(pdMS_TO_TICKS(1000));
+  esp_restart();
+  return NULL; // This won't be reached
+}
+
+char *get_file_list_handle()
+{
+  char *response = NULL;
+  cJSON *root = cJSON_CreateArray();
+  if (root != NULL)
+  {
+    DIR *dir = opendir("/spiffs");
+    if (dir != NULL)
+    {
+      struct dirent *entry;
+      while ((entry = readdir(dir)) != NULL)
+      {
+        if (entry->d_type == DT_REG)
+        {
+          cJSON *file = cJSON_CreateObject();
+          cJSON_AddStringToObject(file, "name", entry->d_name);
+          
+          // Get file size
+          char filepath[512];
+          int len = snprintf(filepath, sizeof(filepath), "/spiffs/%s", entry->d_name);
+          if (len >= sizeof(filepath)) {
+            ESP_LOGW(TAG, "File path too long: %s", entry->d_name);
+            continue;
+          }
+          struct stat st;
+          if (stat(filepath, &st) == 0)
+          {
+            cJSON_AddNumberToObject(file, "size", st.st_size);
+          }
+          
+          cJSON_AddItemToArray(root, file);
+        }
+      }
+      closedir(dir);
+    }
+    response = cJSON_Print(root);
+    cJSON_Delete(root);
+  }
+  return response;
+}
+
+char *delete_file_handle(const char *filename)
+{
+  char filepath[256];
+  snprintf(filepath, sizeof(filepath), "/spiffs/%s", filename);
+  
+  if (remove(filepath) == 0)
+  {
+    return strdup("{\"status\":\"success\"}");
+  }
+  else
+  {
+    return strdup("{\"status\":\"error\"}");
+  }
+}
+
+char *get_homekit_handle()
+{
+  return homekit_get_accessory_info();
+}
+
+char *set_homekit_handle(int ops, const char *value)
+{
+  cJSON *root = cJSON_CreateObject();
+  cJSON_AddStringToObject(root, "status", "success");
+
+  switch (ops)
+  {
+  case CONF_HOMEKIT_ENABLE:
+    if (strcmp(value, "1") == 0) {
+      homekit_set_enabled(true);
+      cJSON_AddStringToObject(root, "message", "HomeKit enabled");
+    } else {
+      homekit_set_enabled(false);
+      cJSON_AddStringToObject(root, "message", "HomeKit disabled");
+    }
+    break;
+  case CONF_HOMEKIT_SETUP_CODE:
+    if (strlen(value) == 8) {
+      homekit_set_setup_code(value);
+      cJSON_AddStringToObject(root, "message", "HomeKit setup code updated");
+    } else {
+      cJSON_ReplaceItemInObject(root, "status", cJSON_CreateString("error"));
+      cJSON_AddStringToObject(root, "message", "Setup code must be 8 digits");
+    }
+    break;
+  default:
+    cJSON_ReplaceItemInObject(root, "status", cJSON_CreateString("error"));
+    cJSON_AddStringToObject(root, "message", "Invalid HomeKit operation");
+    break;
+  }
+
+  char *json = cJSON_Print(root);
+  cJSON_Delete(root);
+  return json;
 }

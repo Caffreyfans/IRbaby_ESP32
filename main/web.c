@@ -17,6 +17,8 @@
 #include "string.h"
 #include "sys/param.h"
 #include "web_handler.h"
+#include <stdio.h>
+#include "esp_ota_ops.h"
 static const char *TAG = "web.c";
 
 extern const char wificonfig_html[] asm("_binary_wificonfig_html_start");
@@ -52,6 +54,9 @@ static esp_err_t index_handler(httpd_req_t *req)
       break;
     case 3:
       response = get_more_handle();
+      break;
+    case 4:
+      response = get_mqtt_handle();
       break;
     default:
       break;
@@ -155,6 +160,83 @@ static esp_err_t index_handler(httpd_req_t *req)
 
       response = set_gpio_handle(CONF_PIN_BUTTON, atoi(buffer));
     }
+    else if (httpd_query_key_value(query_str, "mqtt_enable", buffer, BUFFER_SIZE) ==
+             ESP_OK)
+    {
+
+      response = set_mqtt_handle(CONF_MQTT_ENABLE, buffer);
+    }
+    else if (httpd_query_key_value(query_str, "mqtt_broker_url", buffer, BUFFER_SIZE) ==
+             ESP_OK)
+    {
+
+      response = set_mqtt_handle(CONF_MQTT_BROKER_URL, buffer);
+    }
+    else if (httpd_query_key_value(query_str, "mqtt_broker_port", buffer, BUFFER_SIZE) ==
+             ESP_OK)
+    {
+
+      response = set_mqtt_handle(CONF_MQTT_BROKER_PORT, buffer);
+    }
+    else if (httpd_query_key_value(query_str, "mqtt_username", buffer, BUFFER_SIZE) ==
+             ESP_OK)
+    {
+
+      response = set_mqtt_handle(CONF_MQTT_USERNAME, buffer);
+    }
+    else if (httpd_query_key_value(query_str, "mqtt_password", buffer, BUFFER_SIZE) ==
+             ESP_OK)
+    {
+
+      response = set_mqtt_handle(CONF_MQTT_PASSWORD, buffer);
+    }
+    else if (httpd_query_key_value(query_str, "mqtt_client_id", buffer, BUFFER_SIZE) ==
+             ESP_OK)
+    {
+
+      response = set_mqtt_handle(CONF_MQTT_CLIENT_ID, buffer);
+    }
+    else if (httpd_query_key_value(query_str, "mqtt_topic_prefix", buffer, BUFFER_SIZE) ==
+             ESP_OK)
+    {
+
+      response = set_mqtt_handle(CONF_MQTT_TOPIC_PREFIX, buffer);
+    }
+    else if (httpd_query_key_value(query_str, "ota", buffer, BUFFER_SIZE) ==
+             ESP_OK)
+    {
+      response = ota_update_handle(buffer);
+    }
+    else if (httpd_query_key_value(query_str, "reboot", buffer, BUFFER_SIZE) ==
+             ESP_OK)
+    {
+      response = reboot_handle();
+    }
+    else if (httpd_query_key_value(query_str, "file_list", buffer, BUFFER_SIZE) ==
+             ESP_OK)
+    {
+      response = get_file_list_handle();
+    }
+    else if (httpd_query_key_value(query_str, "delete_file", buffer, BUFFER_SIZE) ==
+             ESP_OK)
+    {
+      response = delete_file_handle(buffer);
+    }
+    else if (httpd_query_key_value(query_str, "get_homekit", buffer, BUFFER_SIZE) ==
+             ESP_OK)
+    {
+      response = get_homekit_handle();
+    }
+    else if (httpd_query_key_value(query_str, "set_homekit_enable", buffer, BUFFER_SIZE) ==
+             ESP_OK)
+    {
+      response = set_homekit_handle(CONF_HOMEKIT_ENABLE, buffer);
+    }
+    else if (httpd_query_key_value(query_str, "set_homekit_setup_code", buffer, BUFFER_SIZE) ==
+             ESP_OK)
+    {
+      response = set_homekit_handle(CONF_HOMEKIT_SETUP_CODE, buffer);
+    }
   }
   if (response != NULL)
   {
@@ -178,6 +260,147 @@ static esp_err_t root_handler(httpd_req_t *req)
   {
     httpd_resp_sendstr(req, (const char *)wificonfig_html);
   }
+  return ESP_OK;
+}
+static esp_err_t upload_handler(httpd_req_t *req)
+{
+  char buf[1024];
+  int received;
+  int remaining = req->content_len;
+  FILE *fd = NULL;
+  char filename[256] = {0};
+  
+  // Parse multipart form data to get filename
+  // This is a simplified implementation
+  while ((received = httpd_req_recv(req, buf, MIN(remaining, sizeof(buf)))) > 0)
+  {
+    if (fd == NULL)
+    {
+      // Look for filename in the multipart data
+      char *filename_start = strstr(buf, "filename=\"");
+      if (filename_start)
+      {
+        filename_start += 10; // Skip 'filename="'
+        char *filename_end = strchr(filename_start, '"');
+        if (filename_end)
+        {
+          size_t len = filename_end - filename_start;
+          if (len < sizeof(filename))
+          {
+            strncpy(filename, filename_start, len);
+            filename[len] = '\0';
+            
+            char filepath[512];
+            int path_len = snprintf(filepath, sizeof(filepath), "/spiffs/%s", filename);
+            if (path_len >= sizeof(filepath)) {
+              ESP_LOGW(TAG, "File path too long: %s", filename);
+              httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Filename too long");
+              return ESP_FAIL;
+            }
+            fd = fopen(filepath, "wb");
+          }
+        }
+      }
+      
+      // Skip headers and find actual file data
+      char *data_start = strstr(buf, "\r\n\r\n");
+      if (data_start)
+      {
+        data_start += 4;
+        int data_len = received - (data_start - buf);
+        if (fd && data_len > 0)
+        {
+          fwrite(data_start, 1, data_len, fd);
+        }
+      }
+    }
+    else
+    {
+      // Write file data
+      fwrite(buf, 1, received, fd);
+    }
+    
+    remaining -= received;
+  }
+  
+  if (fd)
+  {
+    fclose(fd);
+  }
+  
+  httpd_resp_sendstr(req, "{\"status\":\"success\"}");
+  return ESP_OK;
+}
+
+static esp_err_t firmware_upload_handler(httpd_req_t *req)
+{
+  char buf[1024];
+  int received;
+  int remaining = req->content_len;
+  esp_ota_handle_t ota_handle = 0;
+  const esp_partition_t *ota_partition = NULL;
+  
+  // Find next OTA partition
+  ota_partition = esp_ota_get_next_update_partition(NULL);
+  if (ota_partition == NULL)
+  {
+    httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "No OTA partition found");
+    return ESP_FAIL;
+  }
+  
+  // Begin OTA update
+  esp_err_t err = esp_ota_begin(ota_partition, OTA_SIZE_UNKNOWN, &ota_handle);
+  if (err != ESP_OK)
+  {
+    httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "OTA begin failed");
+    return ESP_FAIL;
+  }
+  
+  // Skip multipart headers and write firmware data
+  bool headers_skipped = false;
+  while ((received = httpd_req_recv(req, buf, MIN(remaining, sizeof(buf)))) > 0)
+  {
+    if (!headers_skipped)
+    {
+      // Skip multipart headers
+      char *data_start = strstr(buf, "\r\n\r\n");
+      if (data_start)
+      {
+        data_start += 4;
+        int data_len = received - (data_start - buf);
+        if (data_len > 0)
+        {
+          esp_ota_write(ota_handle, data_start, data_len);
+        }
+        headers_skipped = true;
+      }
+    }
+    else
+    {
+      // Write firmware data
+      esp_ota_write(ota_handle, buf, received);
+    }
+    
+    remaining -= received;
+  }
+  
+  // End OTA update
+  err = esp_ota_end(ota_handle);
+  if (err != ESP_OK)
+  {
+    httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "OTA end failed");
+    return ESP_FAIL;
+  }
+  
+  // Set boot partition
+  err = esp_ota_set_boot_partition(ota_partition);
+  if (err != ESP_OK)
+  {
+    httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "OTA set boot partition failed");
+    return ESP_FAIL;
+  }
+  
+  httpd_resp_sendstr(req, "{\"status\":\"success\",\"message\":\"Firmware uploaded. Reboot to apply.\"}");
   return ESP_OK;
 }
 
@@ -287,6 +510,16 @@ void start_webserver(void)
                                  .handler = index_handler,
                                  .user_ctx = NULL};
 
+  const httpd_uri_t upload_post = {.uri = "/upload",
+                                   .method = HTTP_POST,
+                                   .handler = upload_handler,
+                                   .user_ctx = NULL};
+
+  const httpd_uri_t firmware_upload_post = {.uri = "/firmware_upload",
+                                           .method = HTTP_POST,
+                                           .handler = firmware_upload_handler,
+                                           .user_ctx = NULL};
+
   ESP_LOGI(TAG, "Starting server on port: '%d'", config.server_port);
 
   if (httpd_start(&server, &config) == ESP_OK)
@@ -297,6 +530,8 @@ void start_webserver(void)
     httpd_register_uri_handler(server, &root);
     httpd_register_uri_handler(server, &generate_204);
     httpd_register_uri_handler(server, &index_get);
+    httpd_register_uri_handler(server, &upload_post);
+    httpd_register_uri_handler(server, &firmware_upload_post);
   }
 }
 

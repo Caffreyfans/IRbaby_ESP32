@@ -34,6 +34,14 @@ char *set_ir_handle(ir_ops ops, int value);
 char *get_ir_handle();
 char *set_gpio_handle(pin_ops ops, int value);
 char *get_gpio_handle();
+char *get_mqtt_handle();
+char *set_mqtt_handle(mqtt_ops ops, const char *value);
 char *get_info_handle();
 char *get_more_handle();
+char *ota_update_handle(const char *url);
+char *reboot_handle();
+char *get_file_list_handle();
+char *delete_file_handle(const char *filename);
+char *get_homekit_handle();
+char *set_homekit_handle(int ops, const char *value);
 #endif // HANDLER_H_

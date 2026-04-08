@@ -30,6 +30,8 @@
 #include "conf.h"
 #include "ir.h"
 #include "peripherals.h"
+#include "mqtt.h"
+#include "homekit.h"
 static const char *TAG = "IRbaby";
 
 void app_main(void)
@@ -93,4 +95,18 @@ void app_main(void)
   ir_init(tx_pin, rx_pin);
   wifi_init();
   start_webserver();
+  
+  // Initialize MQTT if enabled
+  string_property_t *mqtt_conf = irbaby_get_string_conf(CONF_MQTT);
+  if (strcmp(mqtt_conf[CONF_MQTT_ENABLE].value, "1") == 0) {
+    mqtt_init(mqtt_conf[CONF_MQTT_BROKER_URL].value,
+              atoi(mqtt_conf[CONF_MQTT_BROKER_PORT].value),
+              mqtt_conf[CONF_MQTT_USERNAME].value,
+              mqtt_conf[CONF_MQTT_PASSWORD].value,
+              mqtt_conf[CONF_MQTT_CLIENT_ID].value,
+              mqtt_conf[CONF_MQTT_TOPIC_PREFIX].value);
+  }
+
+  // Initialize HomeKit
+  homekit_init();
 }

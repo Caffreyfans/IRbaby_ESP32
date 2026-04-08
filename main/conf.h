@@ -19,10 +19,19 @@ typedef struct
   char *label;
 } property_t;
 
+typedef struct
+{
+  uint16_t key;
+  char *value;
+  char *label;
+} string_property_t;
+
 typedef enum
 {
   CONF_AC,
   CONF_PIN,
+  CONF_MQTT,
+  CONF_HOMEKIT,
   CONFIG_INFO,
   CONFIG_MORE
 } conf_type;
@@ -52,8 +61,29 @@ typedef enum
   CONF_PIN_MAX,
 } pin_ops;
 
+typedef enum
+{
+  CONF_MQTT_ENABLE,
+  CONF_MQTT_BROKER_URL,
+  CONF_MQTT_BROKER_PORT,
+  CONF_MQTT_USERNAME,
+  CONF_MQTT_PASSWORD,
+  CONF_MQTT_CLIENT_ID,
+  CONF_MQTT_TOPIC_PREFIX,
+  CONF_MQTT_MAX,
+} mqtt_ops;
+
+typedef enum
+{
+  CONF_HOMEKIT_ENABLE,
+  CONF_HOMEKIT_SETUP_CODE,
+  CONF_HOMEKIT_MAX,
+} homekit_ops;
+
 void irbaby_set_conf(conf_type type, int key, int value);
+void irbaby_set_string_conf(conf_type type, int key, const char *value);
 property_t *irbaby_get_conf(conf_type type);
+string_property_t *irbaby_get_string_conf(conf_type type);
 int irbaby_get_conf_num(conf_type type);
 void irbaby_store_conf();
 void irbaby_load_conf();

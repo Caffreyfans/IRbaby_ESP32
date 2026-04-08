@@ -1514,13 +1514,13 @@
                 },
                 {
                     "render": "cells",
-                    "label": "System",
+                    "label": "OTA Update",
                     "cells": [
                         {
-                            "render": "url",
-                            "label": "Reboot",
-                            "confirm": "Are you sure to reboot?",
-                            "key": "reboot"
+                            "render": "input",
+                            "label": "Firmware URL",
+                            "key": "ota",
+                            "placeholder": "https://example.com/firmware.bin"
                         }
                     ]
                 },
