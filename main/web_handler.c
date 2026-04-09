@@ -76,12 +76,20 @@ static char *get_conf_handle(conf_type type)
     return NULL;
   if (type == CONF_MQTT) {
     string_property_t *property = irbaby_get_string_conf(type);
+    if (!property) {
+      cJSON_Delete(root);
+      return NULL;
+    }
     for (int i = 0; i < irbaby_get_conf_num(type); i++)
     {
       cJSON_AddStringToObject(root, irbaby_get_conf_label(type, i), property[i].value ? property[i].value : "");
     }
   } else {
     property_t *property = irbaby_get_conf(type);
+    if (!property) {
+      cJSON_Delete(root);
+      return NULL;
+    }
     for (int i = 0; i < irbaby_get_conf_num(type); i++)
     {
       if (type == CONF_AC)
@@ -358,12 +366,15 @@ char *set_mqtt_handle(mqtt_ops ops, const char *value)
   mqtt_deinit();
   string_property_t *mqtt_conf = irbaby_get_string_conf(CONF_MQTT);
   if (strcmp(mqtt_conf[CONF_MQTT_ENABLE].value, "1") == 0) {
-    mqtt_init(mqtt_conf[CONF_MQTT_BROKER_URL].value,
-              atoi(mqtt_conf[CONF_MQTT_BROKER_PORT].value),
-              mqtt_conf[CONF_MQTT_USERNAME].value,
-              mqtt_conf[CONF_MQTT_PASSWORD].value,
-              mqtt_conf[CONF_MQTT_CLIENT_ID].value,
-              mqtt_conf[CONF_MQTT_TOPIC_PREFIX].value);
+    esp_err_t mqtt_err = mqtt_init(mqtt_conf[CONF_MQTT_BROKER_URL].value,
+                                     atoi(mqtt_conf[CONF_MQTT_BROKER_PORT].value),
+                                     mqtt_conf[CONF_MQTT_USERNAME].value,
+                                     mqtt_conf[CONF_MQTT_PASSWORD].value,
+                                     mqtt_conf[CONF_MQTT_CLIENT_ID].value,
+                                     mqtt_conf[CONF_MQTT_TOPIC_PREFIX].value);
+    if (mqtt_err != ESP_OK) {
+      ESP_LOGE(TAG, "Failed to reinitialize MQTT: %s", esp_err_to_name(mqtt_err));
+    }
   }
   return get_mqtt_handle();
 }

@@ -11,8 +11,9 @@
 ### ✨ 核心特性
 
 - 🌐 **网页配置界面** - 友好的Web UI，支持实时控制和配置
-- 🏠 **HomeKit 集成** - 接入苹果HomeKit生态，支持自定义配件
-- 🔗 **MQTT 支持** - 与 Home Assistant 等平台无缝集成
+- 🏠 **Home Assistant 集成** - 自动发现并集成到 HA 气候控制系统
+- 🍎 **HomeKit 集成** - 接入苹果HomeKit生态，支持自定义配件
+- 🔗 **MQTT 支持** - 与 Home Assistant 等平台无缝集成，支持自动发现
 - ☁️ **OTA 升级** - 支持空中升级固件
 - 💾 **文件管理** - 支持通过Web界面上传和管理配置文件
 - 🔄 **远程控制** - 通过MQTT和Web API控制红外信号发送
@@ -63,8 +64,7 @@ idf.py flash monitor
 ### 已完成 ✅
 
 - [x] 网页UI配置界面
-- [x] MQTT 控制与 HomeAssistant 集成
-- [x] HomeKit 配件支持
+- [x] MQTT 控制与 HomeAssistant 集成- [x] Home Assistant 自动发现与气候控制- [x] HomeKit 配件支持
 - [x] OTA 远程升级
 - [x] 文件管理功能
 - [x] 系统重启控制
@@ -106,9 +106,13 @@ IRbaby_ESP32/
 
 ### MQTT 主题
 
-- `homekit/state` - HomeKit 状态
-- `ir/command` - 红外命令控制
-- `ir/status` - 红外状态反馈
+- `homeassistant/climate/{device_id}/config` - HA 自动发现配置
+- `{prefix}/state` - 设备状态 (HA 兼容格式)
+- `{prefix}/command` - 控制命令 (支持 HA 气候控制)
+- `{prefix}/response` - 命令响应
+- `homekit/state` - HomeKit 状态 (向后兼容)
+- `ir/command` - 红外命令控制 (向后兼容)
+- `ir/status` - 红外状态反馈 (向后兼容)
 
 ## 📝 配置示例
 
@@ -122,6 +126,48 @@ IRbaby_ESP32/
   "mqtt_topic_prefix": "irbaby"
 }
 ```
+
+## 🏠 Home Assistant 集成
+
+IRbaby ESP32 支持自动发现并集成到 Home Assistant 的气候控制系统。
+
+### 自动发现
+
+设备连接到 MQTT 后会自动发布发现消息，HA 会自动识别并添加气候控制实体。
+
+### 支持的功能
+
+- **模式控制**: off, auto, cool, heat, dry, fan_only
+- **温度控制**: 16-30°C 范围，1°C 步进
+- **风速控制**: auto, low, medium, high
+- **状态反馈**: 实时状态同步到 HA
+
+### MQTT 消息格式
+
+**状态消息** (发布到 `{prefix}/state`):
+```json
+{
+  "mode": "cool",
+  "temperature": 24,
+  "fan_mode": "auto"
+}
+```
+
+**控制命令** (订阅 `{prefix}/command`):
+```json
+{
+  "mode": "heat",
+  "temperature": 26,
+  "fan_mode": "medium"
+}
+```
+
+### 配置步骤
+
+1. 在 IRbaby Web UI 中配置 MQTT 连接
+2. 确保 HA 已配置相同的 MQTT Broker
+3. 重启 IRbaby 设备，等待自动发现完成
+4. 在 HA 中查看新添加的气候控制实体
 
 ## 🐛 故障排除
 

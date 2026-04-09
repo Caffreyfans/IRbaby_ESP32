@@ -217,6 +217,10 @@ void irbaby_load_conf()
 {
   uint8_t buffer[1024];
   int len = 0;
+  
+  // Initialize buffer to prevent uninitialized memory issues
+  memset(buffer, 0, sizeof(buffer));
+  
   for (int i = 0; i < CONF_AC_MAX; i++)
   {
     ac_conf[i].label = ac_conf_label[i];
@@ -250,8 +254,10 @@ void irbaby_load_conf()
     memcpy(pin_conf, buffer, sizeof(pin_conf));
   }
 
-  len = irbaby_read("mqtt_config", (uint8_t *)buffer, sizeof(buffer));
+  memset(buffer, 0, sizeof(buffer));
+  len = irbaby_read("mqtt_config", (uint8_t *)buffer, sizeof(buffer) - 1);
   if (len > 0) {
+    buffer[len] = '\0';
     cJSON *mqtt_root = cJSON_Parse((char *)buffer);
     if (mqtt_root) {
       for (int i = 0; i < CONF_MQTT_MAX; i++) {

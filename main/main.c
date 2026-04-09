@@ -99,12 +99,15 @@ void app_main(void)
   // Initialize MQTT if enabled
   string_property_t *mqtt_conf = irbaby_get_string_conf(CONF_MQTT);
   if (strcmp(mqtt_conf[CONF_MQTT_ENABLE].value, "1") == 0) {
-    mqtt_init(mqtt_conf[CONF_MQTT_BROKER_URL].value,
-              atoi(mqtt_conf[CONF_MQTT_BROKER_PORT].value),
-              mqtt_conf[CONF_MQTT_USERNAME].value,
-              mqtt_conf[CONF_MQTT_PASSWORD].value,
-              mqtt_conf[CONF_MQTT_CLIENT_ID].value,
-              mqtt_conf[CONF_MQTT_TOPIC_PREFIX].value);
+    esp_err_t mqtt_err = mqtt_init(mqtt_conf[CONF_MQTT_BROKER_URL].value,
+                                     atoi(mqtt_conf[CONF_MQTT_BROKER_PORT].value),
+                                     mqtt_conf[CONF_MQTT_USERNAME].value,
+                                     mqtt_conf[CONF_MQTT_PASSWORD].value,
+                                     mqtt_conf[CONF_MQTT_CLIENT_ID].value,
+                                     mqtt_conf[CONF_MQTT_TOPIC_PREFIX].value);
+    if (mqtt_err != ESP_OK) {
+      ESP_LOGE(TAG, "Failed to initialize MQTT: %s", esp_err_to_name(mqtt_err));
+    }
   }
 
   // Initialize HomeKit
