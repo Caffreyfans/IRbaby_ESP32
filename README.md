@@ -64,7 +64,9 @@ idf.py flash monitor
 ### 已完成 ✅
 
 - [x] 网页UI配置界面
-- [x] MQTT 控制与 HomeAssistant 集成- [x] Home Assistant 自动发现与气候控制- [x] HomeKit 配件支持
+- [x] MQTT 控制与 HomeAssistant 集成
+- [x] Home Assistant 自动发现与气候控制
+- [x] HomeKit 配件支持
 - [x] OTA 远程升级
 - [x] 文件管理功能
 - [x] 系统重启控制
