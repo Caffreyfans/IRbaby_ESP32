@@ -16,7 +16,6 @@
 #include "version.h"
 #include "wifimanager.h"
 #include "esp_mac.h"
-#include "esp_spi_flash.h"
 #include "esp_psram.h"
 #include "esp_flash.h"
 #include "esp_log.h"
@@ -25,6 +24,8 @@
 #include "ir.h"
 #include "mqtt.h"
 #include "homekit.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 #include <string.h>
 #include "esp_system.h"
 #include <dirent.h>
@@ -192,14 +193,21 @@ char *get_info_handle()
                                            "exiting deep sleep mode",
                                            "browout reset",
                                            "SDIO"};
+  esp_reset_reason_t reset_reason = esp_reset_reason();
   cJSON_AddStringToObject(root, "reset_reason",
-                          reset_reason_str[esp_reset_reason()]);
+                          reset_reason < sizeof(reset_reason_str) / sizeof(reset_reason_str[0])
+                              ? reset_reason_str[reset_reason]
+                              : "unknown");
 
-  wifi_ap_record_t ap;
+  wifi_ap_record_t ap = {0};
   esp_wifi_sta_get_ap_info(&ap);
   cJSON_AddStringToObject(root, "wifi_ssid", (char *)ap.ssid);
   esp_netif_ip_info_t ip_info;
-  esp_netif_get_ip_info(g_station_netif, &ip_info);
+  memset(&ip_info, 0, sizeof(ip_info));
+  if (g_station_netif != NULL)
+  {
+    esp_netif_get_ip_info(g_station_netif, &ip_info);
+  }
   snprintf(ret_buffer, RET_BUFFER_SIZE, IPSTR, IP2STR(&ip_info.ip));
   cJSON_AddStringToObject(root, "wifi_ip", ret_buffer);
 
@@ -231,10 +239,10 @@ char *get_info_handle()
   size_t total_bytes, used_bytes;
   esp_spiffs_info("spiffs", &total_bytes, &used_bytes);
 
-  snprintf(ret_buffer, RET_BUFFER_SIZE, "%dKB", total_bytes / 1024 / 1024);
+  snprintf(ret_buffer, RET_BUFFER_SIZE, "%uKB", (unsigned)(total_bytes / 1024));
   cJSON_AddStringToObject(root, "fs_total", ret_buffer);
 
-  snprintf(ret_buffer, RET_BUFFER_SIZE, "%dKB", used_bytes / 1024 / 1024);
+  snprintf(ret_buffer, RET_BUFFER_SIZE, "%uKB", (unsigned)(used_bytes / 1024));
   cJSON_AddStringToObject(root, "fs_used", ret_buffer);
   response = cJSON_Print(root);
   cJSON_Delete(root);
@@ -246,28 +254,52 @@ char *get_index_handle()
   extern const char config_json[] asm("_binary_config_json_start");
   char *response = NULL;
   cJSON *root = cJSON_Parse(config_json);
-  CHECK_IS_NULL(root, response);
+  cJSON *token_obj = NULL;
+  cJSON *indexes_obj = NULL;
+  if (root == NULL)
+    goto exit;
   cJSON *tabs = cJSON_GetObjectItem(root, "tabs");
-  CHECK_IS_NULL(tabs, response);
+  if (tabs == NULL)
+    goto exit;
   cJSON *tab0 = cJSON_GetArrayItem(tabs, 0);
-  CHECK_IS_NULL(tab0, response);
+  if (tab0 == NULL)
+    goto exit;
   cJSON *contents = cJSON_GetObjectItem(tab0, "contents");
-  CHECK_IS_NULL(contents, response);
+  if (contents == NULL)
+    goto exit;
   cJSON *content0 = cJSON_GetArrayItem(contents, 0);
-  CHECK_IS_NULL(content0, response);
+  if (content0 == NULL)
+    goto exit;
   cJSON *cells = cJSON_GetObjectItem(content0, "cells");
-  CHECK_IS_NULL(cells, response);
+  if (cells == NULL)
+    goto exit;
   cJSON *cell2 = cJSON_GetArrayItem(cells, 1);
-  CHECK_IS_NULL(cell2, response);
+  if (cell2 == NULL)
+    goto exit;
 
-  cJSON *token_obj = irext_login(APP_KEY, APP_SECRET, "2");
-  char *token_str = cJSON_GetObjectItem(token_obj, "token")->valuestring;
-  int id = cJSON_GetObjectItem(token_obj, "id")->valueint;
+  token_obj = irext_login(APP_KEY, APP_SECRET, "2");
+  cJSON *token_item = cJSON_GetObjectItem(token_obj, "token");
+  cJSON *id_item = cJSON_GetObjectItem(token_obj, "id");
+  if (token_item == NULL || token_item->valuestring == NULL || id_item == NULL)
+    goto exit;
+  char *token_str = token_item->valuestring;
+  int id = id_item->valueint;
   property_t *property = irbaby_get_conf(CONF_AC);
   const int brand_id = property[CONF_AC_BRAND].value;
-  cJSON *indexes_obj = irext_list_indexes(1, brand_id, id, token_str);
-  cJSON_ReplaceItemInObject(cell2, "options", indexes_obj);
+  indexes_obj = irext_list_indexes(1, brand_id, id, token_str);
+  if (indexes_obj == NULL)
+    goto exit;
+  if (!cJSON_ReplaceItemInObject(cell2, "options", indexes_obj))
+    goto exit;
+  indexes_obj = NULL;
   response = cJSON_PrintUnformatted(root);
+exit:
+  if (indexes_obj != NULL)
+    cJSON_Delete(indexes_obj);
+  if (token_obj != NULL)
+    cJSON_Delete(token_obj);
+  if (root != NULL)
+    cJSON_Delete(root);
   return response;
 }
 
@@ -276,17 +308,30 @@ static char *get_protocol_handle(int brand_id)
   char *response = NULL;
   cJSON *root = cJSON_CreateObject();
   cJSON *token_obj = irext_login(APP_KEY, APP_SECRET, "2");
-  char *token_str = cJSON_GetObjectItem(token_obj, "token")->valuestring;
-  int id = cJSON_GetObjectItem(token_obj, "id")->valueint;
-  cJSON *indexes_obj = irext_list_indexes(1, brand_id, id, token_str);
+  cJSON *indexes_obj = NULL;
+  if (root == NULL || token_obj == NULL)
+    goto exit;
+
+  cJSON *token_item = cJSON_GetObjectItem(token_obj, "token");
+  cJSON *id_item = cJSON_GetObjectItem(token_obj, "id");
+  if (token_item == NULL || token_item->valuestring == NULL || id_item == NULL)
+    goto exit;
+
+  char *token_str = token_item->valuestring;
+  int id = id_item->valueint;
+  indexes_obj = irext_list_indexes(1, brand_id, id, token_str);
 
   if (indexes_obj != NULL)
   {
     // update protocol
     cJSON *item = cJSON_GetArrayItem(indexes_obj, 0);
+    cJSON *value_item = cJSON_GetObjectItem(item, "value");
+    if (value_item == NULL)
+      goto exit;
     irbaby_set_conf(CONF_AC, CONF_AC_PROTOCOL,
-                    cJSON_GetObjectItem(item, "value")->valueint);
+                    value_item->valueint);
     cJSON_AddItemToObject(root, "__protocol__", indexes_obj);
+    indexes_obj = NULL;
     property_t *property = irbaby_get_conf(CONF_AC);
     for (int i = 0; i < irbaby_get_conf_num(CONF_AC); i++)
     {
@@ -294,6 +339,13 @@ static char *get_protocol_handle(int brand_id)
     }
     response = cJSON_PrintUnformatted(root);
   }
+exit:
+  if (indexes_obj != NULL)
+    cJSON_Delete(indexes_obj);
+  if (token_obj != NULL)
+    cJSON_Delete(token_obj);
+  if (root != NULL)
+    cJSON_Delete(root);
   return response;
 }
 
@@ -381,12 +433,20 @@ char *set_mqtt_handle(mqtt_ops ops, const char *value)
 
 extern char *ota_update_handle(const char *url);
 
-char *reboot_handle()
+static void reboot_task(void *arg)
 {
-  // Schedule a reboot after a short delay to allow response to be sent
   vTaskDelay(pdMS_TO_TICKS(1000));
   esp_restart();
-  return NULL; // This won't be reached
+}
+
+char *reboot_handle()
+{
+  if (xTaskCreate(reboot_task, "reboot_task", 2048, NULL, 5, NULL) != pdPASS)
+  {
+    return strdup("{\"status\":\"error\",\"message\":\"failed to schedule reboot\"}");
+  }
+
+  return strdup("{\"status\":\"success\",\"message\":\"rebooting\"}");
 }
 
 char *get_file_list_handle()
@@ -430,10 +490,28 @@ char *get_file_list_handle()
   return response;
 }
 
+static int is_safe_spiffs_filename(const char *filename)
+{
+  return filename != NULL && filename[0] != '\0' &&
+         strchr(filename, '/') == NULL &&
+         strchr(filename, '\\') == NULL &&
+         strchr(filename, ':') == NULL &&
+         strstr(filename, "..") == NULL;
+}
+
 char *delete_file_handle(const char *filename)
 {
+  if (!is_safe_spiffs_filename(filename))
+  {
+    return strdup("{\"status\":\"error\",\"message\":\"invalid filename\"}");
+  }
+
   char filepath[256];
-  snprintf(filepath, sizeof(filepath), "/spiffs/%s", filename);
+  int len = snprintf(filepath, sizeof(filepath), "/spiffs/%s", filename);
+  if (len < 0 || len >= sizeof(filepath))
+  {
+    return strdup("{\"status\":\"error\",\"message\":\"filename too long\"}");
+  }
   
   if (remove(filepath) == 0)
   {

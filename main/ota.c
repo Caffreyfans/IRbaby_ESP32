@@ -5,9 +5,17 @@
 #include "esp_ota_ops.h"
 #include "esp_log.h"
 #include "cJSON.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 #include <string.h>
 
 static const char *TAG = "ota";
+
+static void ota_reboot_task(void *arg)
+{
+  vTaskDelay(pdMS_TO_TICKS(1000));
+  esp_restart();
+}
 
 char *ota_update_handle(const char *url)
 {
@@ -43,6 +51,15 @@ char *ota_update_handle(const char *url)
 
   esp_ota_handle_t update_handle = 0;
   const esp_partition_t *update_partition = esp_ota_get_next_update_partition(NULL);
+  if (update_partition == NULL) {
+    cJSON_AddStringToObject(root, "status", "error");
+    cJSON_AddStringToObject(root, "message", "No OTA partition available");
+    response = cJSON_Print(root);
+    cJSON_Delete(root);
+    esp_http_client_cleanup(client);
+    return response;
+  }
+
   err = esp_ota_begin(update_partition, OTA_SIZE_UNKNOWN, &update_handle);
   if (err != ESP_OK) {
     cJSON_AddStringToObject(root, "status", "error");
@@ -84,9 +101,11 @@ char *ota_update_handle(const char *url)
       err = esp_ota_set_boot_partition(update_partition);
       if (err == ESP_OK) {
         cJSON_AddStringToObject(root, "status", "success");
-        cJSON_AddStringToObject(root, "message", "OTA update successful, rebooting...");
-        // Reboot after OTA
-        esp_restart();
+        if (xTaskCreate(ota_reboot_task, "ota_reboot_task", 2048, NULL, 5, NULL) == pdPASS) {
+          cJSON_AddStringToObject(root, "message", "OTA update successful, rebooting...");
+        } else {
+          cJSON_AddStringToObject(root, "message", "OTA update successful, reboot scheduling failed");
+        }
       } else {
         cJSON_AddStringToObject(root, "status", "error");
         cJSON_AddStringToObject(root, "message", "Failed to set boot partition");

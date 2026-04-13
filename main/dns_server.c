@@ -32,7 +32,6 @@ Contains the freeRTOS task for the DNS server that processes the requests.
 */
 
 #include "dns_server.h"
-#include <esp_err.h>
 #include <esp_event.h>
 #include <esp_log.h>
 #include <esp_system.h>
@@ -49,7 +48,6 @@ Contains the freeRTOS task for the DNS server that processes the requests.
 #include <stdint.h>
 #include <string.h>
 #include "endian.h"
-#include "wifimanager.h"
 
 static const char TAG[] = "dns_server";
 static TaskHandle_t task_dns_server = NULL;
@@ -84,11 +82,8 @@ void dns_server(void *pvParameters) {
   }
 
   /* Bind to port 53 (typical DNS Server port) */
-  esp_netif_ip_info_t ip;
-  esp_netif_t *netif_sta = g_station_netif;
-  ESP_ERROR_CHECK(esp_netif_get_ip_info(netif_sta, &ip));
   ra.sin_family = AF_INET;
-  ra.sin_addr.s_addr = ip.ip.addr;
+  ra.sin_addr.s_addr = ip_resolved.addr;
   ra.sin_port = htons(53);
   if (bind(socket_fd, (struct sockaddr *)&ra, sizeof(struct sockaddr_in)) ==
       -1) {

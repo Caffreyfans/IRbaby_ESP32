@@ -16,6 +16,8 @@
 #include <lwip/netdb.h>
 #include <lwip/sockets.h>
 #include <lwip/sys.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "esp_mac.h"
 #include "dns_server.h"
@@ -29,7 +31,7 @@
 #define MAX_STATION_CONNECTION 2
 #define WIFI_CONNECTED_BIT BIT0
 #define WIFI_FAIL_BIT BIT1
-#define ESP_MAXINUM_RETRY 5
+#define ESP_MAXIMUM_RETRY 5
 
 static int s_retry_num = 0;
 static const char *TAG = "wifimanager";
@@ -46,7 +48,7 @@ static void event_handler(void *arg, esp_event_base_t event_base,
   else if (event_base == WIFI_EVENT &&
            event_id == WIFI_EVENT_STA_DISCONNECTED)
   {
-    if (s_retry_num < ESP_MAXINUM_RETRY)
+    if (s_retry_num < ESP_MAXIMUM_RETRY)
     {
       esp_wifi_connect();
       s_retry_num++;
@@ -76,7 +78,6 @@ static char *get_chip_id()
   // Get MAC address for WiFi Station interface
   ESP_ERROR_CHECK(esp_read_mac(mac, ESP_MAC_WIFI_STA));
   snprintf(mac_str, mac_str_len, "%02X%02X%02X", mac[0], mac[2], mac[4]);
-  mac_str[mac_str_len] = 0x00;
   return mac_str;
 }
 
@@ -84,7 +85,7 @@ void wifi_init_softap(void)
 {
   char *chip_id = get_chip_id();
   char ssid[32];
-  snprintf(ssid, 52, "IRbaby_%s", chip_id);
+  snprintf(ssid, sizeof(ssid), "IRbaby_%s", chip_id != NULL ? chip_id : "UNKNOWN");
   free(chip_id);
 
   wifi_config_t wifi_ap_config = {
@@ -95,7 +96,7 @@ void wifi_init_softap(void)
           .max_connection = MAX_STATION_CONNECTION,
           .authmode = WIFI_AUTH_OPEN},
   };
-  strcpy((char *)wifi_ap_config.ap.ssid, ssid);
+  snprintf((char *)wifi_ap_config.ap.ssid, sizeof(wifi_ap_config.ap.ssid), "%s", ssid);
 
   ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_APSTA));
   ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_AP, &wifi_ap_config));
@@ -111,24 +112,45 @@ bool wifi_connect_to_ap(const char *ssid, const char *password)
       .sta = {.threshold.authmode = WIFI_AUTH_WPA2_PSK,
               .pmf_cfg = {.capable = true, .required = false}},
   };
-  strcpy((char *)sta_config.sta.ssid, ssid);
-  strcpy((char *)sta_config.sta.password, password);
-  ESP_LOGI(TAG, "connect wifi %s, %s", ssid, password);
-  ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
+
+  if (ssid == NULL || password == NULL || ssid[0] == '\0' ||
+      strlen(ssid) >= sizeof(sta_config.sta.ssid) ||
+      strlen(password) >= sizeof(sta_config.sta.password) ||
+      s_wifi_event_group == NULL)
+  {
+    ESP_LOGW(TAG, "invalid wifi credentials");
+    return false;
+  }
+
+  snprintf((char *)sta_config.sta.ssid, sizeof(sta_config.sta.ssid), "%s", ssid);
+  snprintf((char *)sta_config.sta.password, sizeof(sta_config.sta.password), "%s", password);
+  ESP_LOGI(TAG, "connect wifi %s", ssid);
+
+  s_retry_num = 0;
+  xEventGroupClearBits(s_wifi_event_group, WIFI_CONNECTED_BIT | WIFI_FAIL_BIT);
+
+  wifi_mode_t mode = WIFI_MODE_NULL;
+  ESP_ERROR_CHECK(esp_wifi_get_mode(&mode));
+  ESP_ERROR_CHECK(esp_wifi_set_mode((mode == WIFI_MODE_AP || mode == WIFI_MODE_APSTA)
+                                        ? WIFI_MODE_APSTA
+                                        : WIFI_MODE_STA));
+  ESP_ERROR_CHECK(esp_wifi_set_storage(WIFI_STORAGE_RAM));
   ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &sta_config));
   ESP_ERROR_CHECK(esp_wifi_start());
   /* Waiting until either the connection is established (WIFI_CONNECTED_BIT) or
    * connection failed for the maximum number of re-tries (WIFI_FAIL_BIT). The
    * bits are set by event_handler() (see above) */
-  EventBits_t bits = xEventGroupWaitBits(s_wifi_event_group, WIFI_CONNECTED_BIT,
-                                         pdTRUE, pdTRUE, pdMS_TO_TICKS(10000));
+  EventBits_t bits = xEventGroupWaitBits(s_wifi_event_group,
+                                         WIFI_CONNECTED_BIT | WIFI_FAIL_BIT,
+                                         pdTRUE, pdFALSE, pdMS_TO_TICKS(10000));
 
   /* The event will not be processed after unregister */
   /* xEventGroupWaitBits() returns the bits before the call returned, hence we
    * can test which event actually happened. */
   if (bits & WIFI_CONNECTED_BIT)
   {
-    esp_wifi_set_storage(WIFI_STORAGE_FLASH);
+    ESP_ERROR_CHECK(esp_wifi_set_storage(WIFI_STORAGE_FLASH));
+    ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &sta_config));
     return true;
   }
   return false;
@@ -157,8 +179,9 @@ void wifi_init()
   ESP_ERROR_CHECK(esp_netif_init());
   ESP_ERROR_CHECK(esp_event_loop_create_default());
   esp_netif_create_default_wifi_ap();
-  esp_netif_create_default_wifi_sta();
+  g_station_netif = esp_netif_create_default_wifi_sta();
   s_wifi_event_group = xEventGroupCreate();
+  ESP_ERROR_CHECK(s_wifi_event_group == NULL ? ESP_ERR_NO_MEM : ESP_OK);
   wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
   ESP_ERROR_CHECK(esp_wifi_init(&cfg));
 

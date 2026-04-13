@@ -7,6 +7,7 @@
 #include "web.h"
 
 #include "conf.h"
+#include "esp_check.h"
 #include "esp_err.h"
 #include "esp_event.h"
 #include "esp_log.h"
@@ -25,6 +26,245 @@ extern const char wificonfig_html[] asm("_binary_wificonfig_html_start");
 extern const char root_html[] asm("_binary_root_html_start");
 extern const char config_json[] asm("_binary_config_json_start");
 extern const char irext_js[] asm("_binary_irext_js_start");
+
+typedef esp_err_t (*multipart_chunk_handler_t)(const uint8_t *data, size_t len, void *ctx);
+
+static void *find_bytes(const void *haystack, size_t haystack_len,
+                        const void *needle, size_t needle_len)
+{
+  if (needle_len == 0 || haystack_len < needle_len)
+  {
+    return NULL;
+  }
+
+  const uint8_t *bytes = (const uint8_t *)haystack;
+  for (size_t i = 0; i <= haystack_len - needle_len; i++)
+  {
+    if (memcmp(bytes + i, needle, needle_len) == 0)
+    {
+      return (void *)(bytes + i);
+    }
+  }
+  return NULL;
+}
+
+static bool is_safe_upload_filename(const char *filename)
+{
+  return filename != NULL && filename[0] != '\0' &&
+         strchr(filename, '/') == NULL &&
+         strchr(filename, '\\') == NULL &&
+         strchr(filename, ':') == NULL &&
+         strstr(filename, "..") == NULL;
+}
+
+static esp_err_t parse_multipart_boundary(httpd_req_t *req, char *boundary,
+                                          size_t boundary_size)
+{
+  char content_type[128];
+  if (httpd_req_get_hdr_value_str(req, "Content-Type", content_type,
+                                  sizeof(content_type)) != ESP_OK)
+  {
+    return ESP_ERR_NOT_FOUND;
+  }
+
+  char *boundary_start = strstr(content_type, "boundary=");
+  if (boundary_start == NULL)
+  {
+    return ESP_ERR_NOT_FOUND;
+  }
+
+  boundary_start += strlen("boundary=");
+  if (*boundary_start == '"')
+  {
+    boundary_start++;
+  }
+
+  size_t len = 0;
+  while (boundary_start[len] != '\0' && boundary_start[len] != ';' &&
+         boundary_start[len] != '"' && len < boundary_size - 1)
+  {
+    boundary[len] = boundary_start[len];
+    len++;
+  }
+  boundary[len] = '\0';
+  return len == 0 ? ESP_ERR_NOT_FOUND : ESP_OK;
+}
+
+static esp_err_t extract_multipart_filename(const char *headers, char *filename,
+                                            size_t filename_size)
+{
+  char *filename_start = strstr(headers, "filename=\"");
+  if (filename_start == NULL)
+  {
+    return ESP_ERR_NOT_FOUND;
+  }
+
+  filename_start += strlen("filename=\"");
+  char *filename_end = strchr(filename_start, '"');
+  if (filename_end == NULL)
+  {
+    return ESP_ERR_NOT_FOUND;
+  }
+
+  size_t len = filename_end - filename_start;
+  if (len == 0 || len >= filename_size)
+  {
+    return ESP_ERR_INVALID_SIZE;
+  }
+
+  memcpy(filename, filename_start, len);
+  filename[len] = '\0';
+  return is_safe_upload_filename(filename) ? ESP_OK : ESP_ERR_INVALID_ARG;
+}
+
+static esp_err_t process_multipart_payload(const uint8_t *data, size_t len,
+                                           const char *marker,
+                                           uint8_t *tail, size_t *tail_len,
+                                           multipart_chunk_handler_t handler,
+                                           void *ctx, bool *done)
+{
+  const size_t marker_len = strlen(marker);
+  uint8_t combined[1200];
+
+  if (*tail_len + len > sizeof(combined))
+  {
+    return ESP_ERR_INVALID_SIZE;
+  }
+
+  memcpy(combined, tail, *tail_len);
+  memcpy(combined + *tail_len, data, len);
+  size_t combined_len = *tail_len + len;
+
+  uint8_t *marker_pos = find_bytes(combined, combined_len, marker, marker_len);
+  if (marker_pos != NULL)
+  {
+    size_t payload_len = marker_pos - combined;
+    if (payload_len > 0)
+    {
+      ESP_RETURN_ON_ERROR(handler(combined, payload_len, ctx), TAG,
+                          "failed to write multipart payload");
+    }
+    *tail_len = 0;
+    *done = true;
+    return ESP_OK;
+  }
+
+  if (combined_len > marker_len)
+  {
+    size_t flush_len = combined_len - marker_len;
+    ESP_RETURN_ON_ERROR(handler(combined, flush_len, ctx), TAG,
+                        "failed to write multipart payload");
+    memcpy(tail, combined + flush_len, marker_len);
+    *tail_len = marker_len;
+  }
+  else
+  {
+    memcpy(tail, combined, combined_len);
+    *tail_len = combined_len;
+  }
+
+  return ESP_OK;
+}
+
+static esp_err_t receive_multipart_file(httpd_req_t *req, char *filename,
+                                        size_t filename_size,
+                                        multipart_chunk_handler_t handler,
+                                        void *ctx)
+{
+  char boundary[96];
+  esp_err_t err = parse_multipart_boundary(req, boundary, sizeof(boundary));
+  if (err != ESP_OK)
+  {
+    return err;
+  }
+
+  char marker[128];
+  int marker_len = snprintf(marker, sizeof(marker), "\r\n--%s", boundary);
+  if (marker_len <= 0 || marker_len >= sizeof(marker))
+  {
+    return ESP_ERR_INVALID_SIZE;
+  }
+
+  uint8_t recv_buf[1024];
+  char header_buf[1024];
+  size_t header_len = 0;
+  uint8_t tail[128];
+  size_t tail_len = 0;
+  int remaining = req->content_len;
+  bool headers_done = false;
+  bool done = false;
+
+  while (remaining > 0 && !done)
+  {
+    int received = httpd_req_recv(req, (char *)recv_buf,
+                                  MIN(remaining, (int)sizeof(recv_buf)));
+    if (received <= 0)
+    {
+      return ESP_FAIL;
+    }
+    remaining -= received;
+
+    uint8_t *payload = recv_buf;
+    size_t payload_len = received;
+    if (!headers_done)
+    {
+      if (header_len + received > sizeof(header_buf))
+      {
+        return ESP_ERR_INVALID_SIZE;
+      }
+
+      memcpy(header_buf + header_len, recv_buf, received);
+      header_len += received;
+      char *header_end = find_bytes(header_buf, header_len, "\r\n\r\n", 4);
+      if (header_end == NULL)
+      {
+        continue;
+      }
+
+      size_t header_size = header_end - header_buf + 4;
+      header_buf[header_size - 2] = '\0';
+      if (filename != NULL)
+      {
+        ESP_RETURN_ON_ERROR(extract_multipart_filename(header_buf, filename,
+                                                       filename_size),
+                            TAG, "invalid upload filename");
+      }
+
+      headers_done = true;
+      payload = (uint8_t *)header_buf + header_size;
+      payload_len = header_len - header_size;
+    }
+
+    if (payload_len > 0)
+    {
+      ESP_RETURN_ON_ERROR(process_multipart_payload(payload, payload_len, marker,
+                                                   tail, &tail_len, handler,
+                                                   ctx, &done),
+                          TAG, "failed to process multipart payload");
+    }
+  }
+
+  if (!headers_done || !done)
+  {
+    return ESP_ERR_INVALID_RESPONSE;
+  }
+
+  return ESP_OK;
+}
+
+static esp_err_t file_upload_chunk_handler(const uint8_t *data, size_t len,
+                                           void *ctx)
+{
+  FILE *fd = (FILE *)ctx;
+  return fwrite(data, 1, len, fd) == len ? ESP_OK : ESP_FAIL;
+}
+
+static esp_err_t ota_upload_chunk_handler(const uint8_t *data, size_t len,
+                                          void *ctx)
+{
+  esp_ota_handle_t *ota_handle = (esp_ota_handle_t *)ctx;
+  return esp_ota_write(*ota_handle, data, len);
+}
 
 static esp_err_t index_handler(httpd_req_t *req)
 {
@@ -264,79 +504,50 @@ static esp_err_t root_handler(httpd_req_t *req)
 }
 static esp_err_t upload_handler(httpd_req_t *req)
 {
-  char buf[1024];
-  int received;
-  int remaining = req->content_len;
   FILE *fd = NULL;
   char filename[256] = {0};
-  
-  // Parse multipart form data to get filename
-  // This is a simplified implementation
-  while ((received = httpd_req_recv(req, buf, MIN(remaining, sizeof(buf)))) > 0)
+  char filepath[512];
+  const char *tmp_filepath = "/spiffs/.upload.tmp";
+
+  fd = fopen(tmp_filepath, "wb");
+  if (fd == NULL)
   {
-    if (fd == NULL)
-    {
-      // Look for filename in the multipart data
-      char *filename_start = strstr(buf, "filename=\"");
-      if (filename_start)
-      {
-        filename_start += 10; // Skip 'filename="'
-        char *filename_end = strchr(filename_start, '"');
-        if (filename_end)
-        {
-          size_t len = filename_end - filename_start;
-          if (len < sizeof(filename))
-          {
-            strncpy(filename, filename_start, len);
-            filename[len] = '\0';
-            
-            char filepath[512];
-            int path_len = snprintf(filepath, sizeof(filepath), "/spiffs/%s", filename);
-            if (path_len >= sizeof(filepath)) {
-              ESP_LOGW(TAG, "File path too long: %s", filename);
-              httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Filename too long");
-              return ESP_FAIL;
-            }
-            fd = fopen(filepath, "wb");
-          }
-        }
-      }
-      
-      // Skip headers and find actual file data
-      char *data_start = strstr(buf, "\r\n\r\n");
-      if (data_start)
-      {
-        data_start += 4;
-        int data_len = received - (data_start - buf);
-        if (fd && data_len > 0)
-        {
-          fwrite(data_start, 1, data_len, fd);
-        }
-      }
-    }
-    else
-    {
-      // Write file data
-      fwrite(buf, 1, received, fd);
-    }
-    
-    remaining -= received;
+    httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to open file");
+    return ESP_FAIL;
   }
-  
-  if (fd)
+
+  esp_err_t err = receive_multipart_file(req, filename, sizeof(filename),
+                                         file_upload_chunk_handler, fd);
+  fclose(fd);
+  if (err != ESP_OK)
   {
-    fclose(fd);
+    remove(tmp_filepath);
+    httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Invalid upload request");
+    return ESP_FAIL;
   }
-  
+
+  int path_len = snprintf(filepath, sizeof(filepath), "/spiffs/%s", filename);
+  if (path_len < 0 || path_len >= sizeof(filepath))
+  {
+    remove(tmp_filepath);
+    httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Filename too long");
+    return ESP_FAIL;
+  }
+
+  remove(filepath);
+  if (rename(tmp_filepath, filepath) != 0)
+  {
+    remove(tmp_filepath);
+    httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Upload failed");
+    return ESP_FAIL;
+  }
+
   httpd_resp_sendstr(req, "{\"status\":\"success\"}");
   return ESP_OK;
 }
 
 static esp_err_t firmware_upload_handler(httpd_req_t *req)
 {
-  char buf[1024];
-  int received;
-  int remaining = req->content_len;
   esp_ota_handle_t ota_handle = 0;
   const esp_partition_t *ota_partition = NULL;
   
@@ -355,33 +566,13 @@ static esp_err_t firmware_upload_handler(httpd_req_t *req)
     httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "OTA begin failed");
     return ESP_FAIL;
   }
-  
-  // Skip multipart headers and write firmware data
-  bool headers_skipped = false;
-  while ((received = httpd_req_recv(req, buf, MIN(remaining, sizeof(buf)))) > 0)
+
+  err = receive_multipart_file(req, NULL, 0, ota_upload_chunk_handler, &ota_handle);
+  if (err != ESP_OK)
   {
-    if (!headers_skipped)
-    {
-      // Skip multipart headers
-      char *data_start = strstr(buf, "\r\n\r\n");
-      if (data_start)
-      {
-        data_start += 4;
-        int data_len = received - (data_start - buf);
-        if (data_len > 0)
-        {
-          esp_ota_write(ota_handle, data_start, data_len);
-        }
-        headers_skipped = true;
-      }
-    }
-    else
-    {
-      // Write firmware data
-      esp_ota_write(ota_handle, buf, received);
-    }
-    
-    remaining -= received;
+    esp_ota_abort(ota_handle);
+    httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Firmware upload failed");
+    return ESP_FAIL;
   }
   
   // End OTA update
@@ -417,9 +608,16 @@ static esp_err_t wificonfig_handler(httpd_req_t *req)
   int cur_len = 0;
   int received = 0;
   char buf[256];
+  if (total_len < 0 || total_len >= (int)sizeof(buf))
+  {
+    httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Request body too large");
+    return ESP_FAIL;
+  }
+
   while (cur_len < total_len)
   {
-    received = httpd_req_recv(req, buf + cur_len, total_len);
+    int receive_len = MIN(total_len - cur_len, (int)sizeof(buf) - cur_len - 1);
+    received = httpd_req_recv(req, buf + cur_len, receive_len);
     if (received <= 0)
     {
       /* Respond with 500 Internal Server Error */
@@ -434,6 +632,7 @@ static esp_err_t wificonfig_handler(httpd_req_t *req)
   cJSON *root = form_parse(buf);
   if (root == NULL)
     return ESP_FAIL;
+
   cJSON *item = NULL;
   if ((item = cJSON_GetObjectItem(root, "scan")) != NULL)
   {
@@ -453,7 +652,14 @@ static esp_err_t wificonfig_handler(httpd_req_t *req)
   else if ((item = cJSON_GetObjectItem(root, "ssid")) != NULL)
   {
     char *ssid = item->valuestring;
-    char *pass = cJSON_GetObjectItem(root, "pass")->valuestring;
+    cJSON *pass_item = cJSON_GetObjectItem(root, "pass");
+    if (ssid == NULL || pass_item == NULL || pass_item->valuestring == NULL)
+    {
+      cJSON_Delete(root);
+      httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Missing wifi credentials");
+      return ESP_FAIL;
+    }
+    char *pass = pass_item->valuestring;
     char *response = connect_wifi_handle(ssid, pass);
     if (response != NULL)
     {
@@ -470,6 +676,7 @@ static esp_err_t wificonfig_handler(httpd_req_t *req)
   {
     ESP_LOGI(TAG, "can not get anything");
   }
+  cJSON_Delete(root);
   return ESP_OK;
 }
 

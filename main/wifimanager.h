@@ -12,7 +12,7 @@
 #include "esp_wifi.h"
 
 void wifi_init();
-bool wifi_start_ap();
+void wifi_init_softap(void);
 bool wifi_connect_to_ap(const char *ssid, const char *password);
 uint8_t wifi_scan_ap(wifi_ap_record_t *ap_infos, const uint8_t size);
 
