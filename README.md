@@ -2,11 +2,11 @@
 
 ![Build Status](https://github.com/caffreyfans/IRbaby_ESP32/actions/workflows/main.yml/badge.svg)
 ![License](https://img.shields.io/badge/license-MIT-green)
-![ESP-IDF](https://img.shields.io/badge/ESP--IDF-v5.4.3-blue)
+![ESP-IDF](https://img.shields.io/badge/ESP--IDF-v5.4.x-blue)
 
 ## 📖 项目描述
 
-基于 **ESP-IDF v5.4.3** 开发的万能红外遥控固件，支持多种智能家居生态。通过直观的网页前端完成配置，无需编程即可控制各类红外设备。
+基于 **ESP-IDF v5.4.x** 开发的万能红外遥控固件，支持多种智能家居生态。通过直观的网页前端完成配置，无需编程即可控制各类红外设备。
 
 ### ✨ 核心特性
 
@@ -27,15 +27,17 @@
 | ESP32-S2 | ✅ | 支持 |
 | ESP32-C3 | ✅ | 支持 |
 | ESP32-S3 | ✅ | 支持 |
-| ESP32-C2 | ❌ | 不支持 |
-| ESP32-H2 | ❌ | 不支持 |
-| ESP32-P4 | ❌ | 不支持 |
+| ESP32-C2 | ✅ | 可生成固件；当前 IDF 目标无 RMT 外设支持，红外收发会在运行时禁用 |
+| ESP32-H2 | ✅ | 可生成基础固件；芯片无内置 Wi-Fi，Web/MQTT/OTA/HomeKit 功能不可用 |
+| ESP32-P4 | ✅ | 可生成基础固件；芯片无内置 Wi-Fi，Web/MQTT/OTA/HomeKit 功能不可用 |
+
+> ESP32-H2 和 ESP32-P4 没有内置 Wi-Fi，因此固件会跳过依赖网络的服务。ESP32-C2 可以构建带网络服务的固件，但当前使用的 RMT 红外驱动在该目标上不可用，红外收发接口会安全降级为日志提示。
 
 ## 🚀 快速开始
 
 ### 环境要求
 
-- ESP-IDF v5.4.3 或更高版本
+- ESP-IDF v5.4.x 或更高版本
 - Python 3.8+
 - Git
 
@@ -52,6 +54,16 @@ git submodule update --init --recursive
 ```bash
 idf.py build
 ```
+
+指定目标芯片：
+
+```bash
+idf.py set-target esp32c2
+idf.py build
+idf.py merge-bin
+```
+
+支持的构建目标包括：`esp32`、`esp32c2`、`esp32c3`、`esp32c6`、`esp32h2`、`esp32p4`、`esp32s2`、`esp32s3`。
 
 ### 烧录固件
 
@@ -70,6 +82,8 @@ idf.py flash monitor
 - [x] OTA 远程升级
 - [x] 文件管理功能
 - [x] 系统重启控制
+- [x] GitHub Actions 多目标固件构建与 Release 上传
+- [x] ESP32-C2 / ESP32-H2 / ESP32-P4 固件生成
 
 ### 待计划 📌
 
@@ -93,6 +107,26 @@ IRbaby_ESP32/
 ├── build/               # 编译输出
 └── CMakeLists.txt       # CMake 配置
 ```
+
+## 📦 固件发布
+
+推送 `v*` 标签后，GitHub Actions 会自动为以下目标构建固件并上传到 Release：
+
+- `esp32`
+- `esp32c2`
+- `esp32c3`
+- `esp32c6`
+- `esp32h2`
+- `esp32p4`
+- `esp32s2`
+- `esp32s3`
+
+每个目标会生成以下文件：
+
+- `IRbaby_<target>_merged.bin` - 合并后的完整烧录固件
+- `IRbaby_<target>_app.bin` - 应用固件
+- `IRbaby_<target>_bootloader.bin` - bootloader
+- `IRbaby_<target>_partition-table.bin` - 分区表
 
 ## 🔌 API 接口
 
