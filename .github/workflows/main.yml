@@ -73,9 +73,64 @@ jobs:
           path: artifacts/*.bin
           if-no-files-found: error
 
+  release:
+    name: Publish GitHub Release
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Download firmware artifacts
+        uses: actions/download-artifact@v6
+        with:
+          path: release-artifacts
+
+      - name: Prepare release notes
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          tag_name="${GITHUB_REF_NAME}"
+          previous_tag="$(git tag --sort=-v:refname | grep -v "^${tag_name}$" | head -n 1 || true)"
+
+          {
+            echo "## IRbaby ESP32 ${tag_name}"
+            echo
+            echo "### 固件目标"
+            echo "- ESP32"
+            echo "- ESP32-S2"
+            echo "- ESP32-S3"
+            echo "- ESP32-C2"
+            echo "- ESP32-C3"
+            echo "- ESP32-C6"
+            echo "- ESP32-H2"
+            echo "- ESP32-P4"
+            echo
+            echo "### 文件说明"
+            echo "- \`IRbaby_<target>_merged.bin\`: 推荐刷写的完整固件"
+            echo "- \`IRbaby_<target>_app.bin\`: 应用固件"
+            echo "- \`IRbaby_<target>_bootloader.bin\`: bootloader"
+            echo "- \`IRbaby_<target>_partition-table.bin\`: 分区表"
+            echo
+            echo "### 兼容说明"
+            echo "- ESP32-H2 和 ESP32-P4 没有内置 Wi-Fi，固件会跳过 Web、MQTT、OTA、HomeKit 等网络功能。"
+            echo "- ESP32-C2 可生成带网络服务的固件；当前目标没有可用 RMT 外设时，红外收发会安全降级为日志提示。"
+            echo
+            echo "### 完整变更"
+            if [ -n "${previous_tag}" ]; then
+              echo "- ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/compare/${previous_tag}...${tag_name}"
+            else
+              echo "- ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/commits/${tag_name}"
+            fi
+          } > release-notes.md
+
       - name: Upload to GitHub Release
-        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v3
         with:
-          files: artifacts/*.bin
-          generate_release_notes: true
+          files: release-artifacts/**/*.bin
+          body_path: release-notes.md
