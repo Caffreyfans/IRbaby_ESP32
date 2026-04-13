@@ -1,50 +1,80 @@
-name: Build & Release IRbaby Firmware
+name: Build and Release IRbaby Firmware
 
 on:
   push:
+    branches:
+      - master
+      - main
     tags:
-      - 'v*'   # 触发条件：push tag，例如 v1.0.0
+      - "v*"
+  pull_request:
+    branches:
+      - master
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
+    name: Build ${{ matrix.target }}
     runs-on: ubuntu-latest
     container:
-      image: espressif/idf:release-v5.4   # 官方 v5.4 Docker 镜像
+      image: espressif/idf:release-v5.4
 
     strategy:
+      fail-fast: false
       matrix:
-        target: [esp32, esp32c6, esp32s2, esp32c3, esp32s3, ]   # 支持的目标芯片
+        target:
+          - esp32
+          - esp32c2
+          - esp32c3
+          - esp32c6
+          - esp32h2
+          - esp32p4
+          - esp32s2
+          - esp32s3
 
     steps:
-      # 1️⃣ Checkout 仓库
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          submodules: false
-          fetch-depth: 1   # 需要完整历史以支持 submodule
+          submodules: recursive
+          fetch-depth: 1
 
-      # 2️⃣ 配置 Git safe directory
       - name: Configure Git safe directory
-        run: |
-          git config --global --add safe.directory /__w/IRbaby_ESP32/IRbaby_ESP32
-          git submodule update --init --recursive --depth 1
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
-      # 5️⃣ 构建固件
-      - name: Build firmware (${{ matrix.target }})
+      - name: Build firmware
         shell: bash
         run: |
+          set -euo pipefail
           . /opt/esp/idf/export.sh
-          idf.py set-target ${{ matrix.target }}
-          idf.py build
-          idf.py merge-bin
-          cp build/merged-binary.bin build/${{ matrix.target }}.bin
 
-      # 6️⃣ 创建 GitHub Release（使用 PAT 避免权限问题）
-      # 🔑 使用 softprops/action-gh-release 来创建 Release 并上传产物
-      - name: Upload to GitHub Release
-        uses: softprops/action-gh-release@v1
+          target="${{ matrix.target }}"
+          build_dir="build_${target}"
+
+          idf.py -B "${build_dir}" set-target "${target}"
+          idf.py -B "${build_dir}" build
+          idf.py -B "${build_dir}" merge-bin
+
+          mkdir -p artifacts
+          cp "${build_dir}/merged-binary.bin" "artifacts/IRbaby_${target}_merged.bin"
+          cp "${build_dir}/ir_protocols.bin" "artifacts/IRbaby_${target}_app.bin"
+          cp "${build_dir}/bootloader/bootloader.bin" "artifacts/IRbaby_${target}_bootloader.bin"
+          cp "${build_dir}/partition_table/partition-table.bin" "artifacts/IRbaby_${target}_partition-table.bin"
+
+      - name: Upload firmware artifact
+        uses: actions/upload-artifact@v4
         with:
-          files: build/${{ matrix.target }}.bin   # 上传的产物，可以写多个，用逗号隔开
-          generate_release_notes: true   # 自动生成 release notes
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}   # 默认 token 就行
+          name: IRbaby-${{ matrix.target }}
+          path: artifacts/*.bin
+          if-no-files-found: error
+
+      - name: Upload to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/*.bin
+          generate_release_notes: true

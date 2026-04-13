@@ -14,24 +14,24 @@
 */
 #include <string.h>
 
-#include "cJSON.h"
-#include "esp_event.h"
-#include "esp_http_server.h"
 #include "esp_log.h"
 #include "esp_spiffs.h"
 #include "esp_system.h"
-#include "esp_wifi.h"
 #include "freertos/FreeRTOS.h"
+#include "sdkconfig.h"
 #include "irbaby.h"
 #include "irext_api.h"
 #include "nvs_flash.h"
-#include "wifimanager.h"
-#include "web.h"
 #include "conf.h"
 #include "ir.h"
 #include "peripherals.h"
+#if CONFIG_SOC_WIFI_SUPPORTED
+#include "esp_wifi.h"
+#include "wifimanager.h"
+#include "web.h"
 #include "mqtt.h"
 #include "homekit.h"
+#endif
 static const char *TAG = "IRbaby";
 
 void app_main(void)
@@ -93,6 +93,7 @@ void app_main(void)
   int tx_pin = pin_conf[CONF_PIN_IR_SEND].value;
   int rx_pin = pin_conf[CONF_PIN_IR_RECV].value;
   ir_init(tx_pin, rx_pin);
+#if CONFIG_SOC_WIFI_SUPPORTED
   wifi_init();
   start_webserver();
   
@@ -112,4 +113,7 @@ void app_main(void)
 
   // Initialize HomeKit
   homekit_init();
+#else
+  ESP_LOGW(TAG, "Wi-Fi is not supported on this target; web, MQTT, OTA, and HomeKit services are disabled.");
+#endif
 }

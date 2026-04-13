@@ -4,7 +4,7 @@ option(ESP32 "build ESP32?" ON)
 
 file(GLOB irext_srcs "IRbaby_SDK/3rdparty/IRext/*.c")
 set(srcs "IRbaby_SDK/3rdparty/coreHTTP/coreHTTP/source/dependency/3rdparty/http_parser/http_parser.c"
-        "IRbaby_SDK/3rdparty/coreHTTP/coreHTTP/source/core_http_client"
+        "IRbaby_SDK/3rdparty/coreHTTP/coreHTTP/source/core_http_client.c"
         "IRbaby_SDK/3rdparty/coreHTTP/port/http_client.c"
         "IRbaby_SDK/3rdparty/cJSON/cJSON/cJSON.c"
         "IRbaby_SDK/src/port/peripherals.c"
