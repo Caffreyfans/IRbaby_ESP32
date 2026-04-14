@@ -108,26 +108,6 @@ IRbaby_ESP32/
 └── CMakeLists.txt       # CMake 配置
 ```
 
-## 📦 固件发布
-
-推送 `v*` 标签后，GitHub Actions 会自动为以下目标构建固件并上传到 Release：
-
-- `esp32`
-- `esp32c2`
-- `esp32c3`
-- `esp32c6`
-- `esp32h2`
-- `esp32p4`
-- `esp32s2`
-- `esp32s3`
-
-每个目标会生成以下文件：
-
-- `IRbaby_<target>_merged.bin` - 合并后的完整烧录固件
-- `IRbaby_<target>_app.bin` - 应用固件
-- `IRbaby_<target>_bootloader.bin` - bootloader
-- `IRbaby_<target>_partition-table.bin` - 分区表
-
 ## 🔌 API 接口
 
 ### Web API
